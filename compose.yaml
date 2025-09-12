@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=wordpress
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysqladmin -h127.0.0.1 -u$$MYSQL_USER ping || exit 1"]
+      start_period: 10s
+      start_interval: 100ms
+    ports:
+      - "3306"
+  wordpress:
+    image: wordpress:php7.4
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+      - WP_PHPUNIT__TESTS_CONFIG=/wp-tests-config.php
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/static-xml-sitemap
+      - ./docker/wordpress/wp-tests-config.php:/wp-tests-config.php
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "80"

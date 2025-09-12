@@ -1,0 +1,24 @@
+{
+  "name": "@achttienvijftien/static-xml-sitemap",
+  "version": "1.0.0",
+  "description": "Static XML sitemap",
+  "main": "build/index.js",
+  "repository": "todo",
+  "author": "1815 <it@1815.nl>",
+  "license": "proprietary",
+  "private": true,
+  "scripts": {
+    "test:php:unit": "composer run test",
+    "test:php:unit:watch": "composer run test:watch",
+    "format:php": "composer run-script format",
+    "lint:php": "composer run-script lint",
+    "build": "wp-scripts build",
+    "format:js": "wp-scripts format ./assets/js",
+    "lint:js": "wp-scripts lint-js ./assets/js",
+    "packages-update": "wp-scripts packages-update",
+    "start": "wp-scripts start"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.18.0"
+  }
+}

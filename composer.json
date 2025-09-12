@@ -1,0 +1,64 @@
+{
+  "name" : "achttienvijftien/static-xml-sitemap",
+  "description" : "Static XML sitemap plugin for WordPress",
+  "keywords" : ["wordpress", "plugin", "static", "xml", "sitemap"],
+  "homepage" : "https://www.1815.nl",
+  "license" : "proprietary",
+  "authors" : [
+    {
+      "name" : "1815",
+      "email" : "it@1815.nl",
+      "homepage" : "https://www.1815.nl"
+    }
+  ],
+  "type" : "wordpress-plugin",
+  "require" : {
+    "php": "^7.4 || ^8.0",
+    "psr/container": "^2.0",
+    "psr/log": "^1.1.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "yoast/phpunit-polyfills": "^2.0",
+    "wp-phpunit/wp-phpunit": "^6.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "*",
+    "phpcompatibility/phpcompatibility-wp": "*",
+    "spatie/phpunit-watcher": "^1.24",
+    "achttienvijftien/building-techniques": "^1.1",
+    "composer/installers": " ^1.8 || ^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AchttienVijftien\\Plugin\\StaticXMLSitemap\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AchttienVijftien\\Plugin\\StaticXMLSitemap\\Tests\\": "tests/php"
+    }
+  },
+  "scripts": {
+    "format": "phpcbf --report-summary --report-source",
+    "lint": "phpcs",
+    "test": [
+      "Composer\\Config::disableProcessTimeout",
+      "@composer install @no_additional_args",
+      "docker-compose up -d --no-recreate @no_additional_args",
+      "docker-compose exec wordpress bash -c 'cd /var/www/html/wp-content/plugins/static-xml-sitemap && ./vendor/bin/phpunit @additional_args'"
+    ],
+    "test:watch": [
+      "Composer\\Config::disableProcessTimeout",
+      "@composer install @no_additional_args",
+      "docker-compose up -d --no-recreate @no_additional_args",
+      "docker-compose exec wordpress bash -c 'cd /var/www/html/wp-content/plugins/static-xml-sitemap && ./vendor/bin/phpunit-watcher watch @additional_args < /dev/tty'"
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}
