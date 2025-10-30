@@ -12,7 +12,10 @@
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap;
 
-require __DIR__ . '/vendor/autoload.php';
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+}
+
 require __DIR__ . '/polyfills.php';
 
 const PLUGIN_DIR  = __DIR__;
