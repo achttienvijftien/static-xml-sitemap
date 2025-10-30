@@ -10,6 +10,8 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Renderer;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Post\PostItemStore;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Store\ItemStoreInterface;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Term\TermItemStore;
+use AchttienVijftien\Plugin\StaticXMLSitemap\User\UserItemStore;
 
 /**
  * Class SitemapRenderer
@@ -19,18 +21,25 @@ class SitemapRenderer {
 	use DateFormatterTrait;
 
 	private PostItemStore $post_item_store;
-	private int $page_size;
+	private UserItemStore $user_item_store;
+	private TermItemStore $term_item_store;
 	private \XMLWriter $writer;
 
-	public function __construct( PostItemStore $post_item_store, int $page_size ) {
+	public function __construct(
+		PostItemStore $post_item_store,
+		UserItemStore $user_item_store,
+		TermItemStore $term_item_store
+	) {
 		$this->post_item_store = $post_item_store;
-		$this->page_size       = $page_size;
+		$this->user_item_store = $user_item_store;
+		$this->term_item_store = $term_item_store;
 		$this->writer          = new \XMLWriter();
 	}
 
 	public function render( Sitemap $sitemap, int $page ) {
 		global $wp_query;
 
+		$items = null;
 		$store = $this->get_item_store( $sitemap );
 		if ( $store ) {
 			$items = $store->paginate( $sitemap )->get_items( $page );
@@ -53,7 +62,10 @@ class SitemapRenderer {
 		foreach ( $items as $item ) {
 			$this->writer->startElement( 'url' );
 			$this->writer->writeElement( 'loc', $item->get_url() );
-			$this->writer->writeElement( 'lastmod', $this->format_date( $item->get_modified() ) );
+			$modified = $item->get_modified();
+			if ( $modified ) {
+				$this->writer->writeElement( 'lastmod', $this->format_date( $modified ) );
+			}
 			$this->writer->endElement();
 		}
 

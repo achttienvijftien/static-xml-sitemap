@@ -33,7 +33,7 @@ class JobRunner {
 	}
 
 	/**
-	 * @return Job[]|\WP_Error
+	 * @return int|\WP_Error
 	 */
 	public function claim_jobs() {
 		$logger         = $this->logger->for_source( __METHOD__ );
@@ -47,7 +47,7 @@ class JobRunner {
 		}
 
 		if ( $jobs_claimed < 1 ) {
-			return [];
+			return $jobs_claimed;
 		}
 
 		$this->running = true;
@@ -67,39 +67,69 @@ class JobRunner {
 	 * @return Job[][]
 	 */
 	public function get_deduplicated_jobs(): array {
-		$add_item        = [];
-		$remove_item     = [];
-		$reindex_item    = [];
-		$reindex_sitemap = [];
+		$add_item             = [];
+		$remove_item          = [];
+		$reindex_item         = [];
+		$reindex_sitemap      = [];
+		$update_last_modified = [];
 
 		foreach ( $this->jobs as $job ) {
 			if ( Job::REINDEX_SITEMAP === $job->action ) {
 				$reindex_sitemap[ $job->sitemap_id ] = $job->sitemap_id;
-				$reindex_item                        = [];
-			} elseif ( Job::ADD_ITEM === $job->action ) {
+
+				$reindex_item = [];
+			}
+
+			if ( Job::ADD_ITEM === $job->action ) {
 				$add_item[ $job->object_id ] = $job->object_id;
-			} elseif ( Job::REMOVE_ITEM === $job->action ) {
+			}
+
+			if ( Job::REMOVE_ITEM === $job->action ) {
 				$item = $this->item_store->get( $job->sitemap_item_id );
 				if ( ! $item ) {
 					continue;
 				}
+
 				$remove_item[ $item->id ] = $item;
+
 				unset( $add_item[ $job->object_id ] );
 				unset( $reindex_item[ $item->id ] );
-			} elseif ( Job::REINDEX_ITEM === $job->action && ! $reindex_sitemap ) {
+				unset( $update_last_modified[ $item->id ] );
+			}
+
+			if ( Job::REINDEX_ITEM === $job->action ) {
+				if ( $reindex_sitemap ) {
+					continue;
+				}
+
 				$item = $this->item_store->get( $job->sitemap_item_id );
 				if ( ! $item ) {
 					continue;
 				}
+
 				$reindex_item[ $item->id ] = $item;
+			}
+
+			if ( Job::UPDATE_LAST_MODIFIED === $job->action ) {
+				if ( isset( $remove_item[ $job->sitemap_item_id ] ) ) {
+					continue;
+				}
+
+				$item = $this->item_store->get( $job->sitemap_item_id );
+				if ( ! $item ) {
+					continue;
+				}
+
+				$update_last_modified[ $item->id ] = $item;
 			}
 		}
 
 		return [
-			Job::ADD_ITEM        => $add_item,
-			Job::REMOVE_ITEM     => $remove_item,
-			Job::REINDEX_ITEM    => $reindex_item,
-			Job::REINDEX_SITEMAP => $reindex_sitemap,
+			Job::ADD_ITEM             => $add_item,
+			Job::REMOVE_ITEM          => $remove_item,
+			Job::REINDEX_ITEM         => $reindex_item,
+			Job::REINDEX_SITEMAP      => $reindex_sitemap,
+			Job::UPDATE_LAST_MODIFIED => $update_last_modified,
 		];
 	}
 

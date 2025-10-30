@@ -104,7 +104,8 @@ class Lock {
 					'option_name'  => $this->name,
 					'option_value' => time(),
 					'autoload'     => 'no',
-				]
+				],
+				[ '%s', '%d', '%s' ]
 			);
 
 			if ( false !== $lock_result ) {

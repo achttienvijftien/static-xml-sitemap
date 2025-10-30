@@ -35,4 +35,16 @@ interface SitemapItemInterface extends EntityInterface {
 
 	public function get_modified(): ?string;
 
+	/**
+	 * @phpstan-param T         $object
+	 *
+	 * @param \WP_Post|\WP_User $object
+	 * @param Sitemap           $sitemap
+	 *
+	 * @return self|null
+	 */
+	public static function for_object( $object, Sitemap $sitemap ): ?self;
+
+	public function get_field( string $field );
+
 }

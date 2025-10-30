@@ -1,8 +1,8 @@
 <?php
 /**
- * SitemapItemTrait trait
+ * SitemapItemTrait
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Entity
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap;

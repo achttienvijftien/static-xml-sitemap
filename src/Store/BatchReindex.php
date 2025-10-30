@@ -80,10 +80,7 @@ class BatchReindex {
 	}
 
 	private function reindex_all(): bool {
-		foreach ( $this->remove as $remove ) {
-			$remove->set_next_item_index( null );
-			$this->item_store->update_item( $remove );
-		}
+		$exclude = array_map( fn( $item ) => $item->get_id(), $this->remove );
 
 		foreach ( $this->insert as $insert ) {
 			if ( ! $insert->exists() ) {
@@ -91,7 +88,18 @@ class BatchReindex {
 			}
 		}
 
-		return false !== $this->item_store->recalculate_index( $this->sitemap );
+		if ( false === $this->item_store->recalculate_index( $this->sitemap, $exclude ) ) {
+			return false;
+		}
+
+		$delete_removed = $this->item_store->delete_query(
+			[
+				'sitemap_id' => $this->sitemap->id,
+				'item_index' => null,
+			],
+		);
+
+		return false !== $delete_removed;
 	}
 
 	private function reindex_items(): bool {
@@ -173,14 +181,14 @@ class BatchReindex {
 			$where_clause = $max_index ? 'next_item_index BETWEEN %d AND %d' : 'next_item_index >= %d';
 			$where_data   = array_filter( [ $min_index, $max_index ] );
 
-			$this->item_store->update_next_index(
+			$this->item_store->offset_next_index(
 				$index_offset,
 				$this->sitemap->id,
 				[ $where_clause, $where_data ],
 			);
 
 			$logger->debug(
-				'update_next_index('
+				'offset_next_index('
 				. json_encode(
 					[
 						'sitemap' => $this->sitemap->id,
@@ -209,28 +217,19 @@ class BatchReindex {
 			}
 		}
 
-		$result = $this->item_store->update_query(
-			[ 'item_index' => 'next_item_index' ],
-			[ 'sitemap_id' => $this->sitemap->id ],
-			[ 'item_index' => '%i' ],
-		);
+		$result = $this->item_store->commit_next_index( $this->sitemap->id );
 
 		if ( false === $result ) {
 			$logger->warning(
 				"Error updating item_index for $this->sitemap: $wpdb->last_error"
 			);
 
+			$this->item_store->clear_next_index( $this->sitemap->id );
+
 			return false;
 		}
 
-		$last_item   = $this->item_store->get_last_modified_object( $this->sitemap );
-		$last_object = $last_item ? $last_item->get_object() : null;
-
-		$this->sitemap->last_modified   = $last_object ? $last_object->post_modified_gmt : null;
-		$this->sitemap->last_object_id  = $last_object ? $last_object->ID : null;
-		$this->sitemap->last_item_index = $last_item ? $last_item->item_index : null;
-		$this->sitemap->item_count      = $this->item_count;
-
+		$this->item_store->update_sitemap_stats( $this->sitemap );
 		$this->sitemap_store->update_sitemap( $this->sitemap );
 
 		$this->item_store->delete_query(
@@ -238,11 +237,6 @@ class BatchReindex {
 				'sitemap_id' => $this->sitemap->id,
 				'item_index' => null,
 			],
-		);
-
-		$this->item_store->update_query(
-			[ 'next_item_index' => null ],
-			[ 'sitemap_id' => $this->sitemap->id ]
 		);
 
 		return true;

@@ -12,6 +12,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapItemInterface;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapItemTrait;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Util\PropertyAccessor;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Util\Url;
 
 /**
  * Class PostItem
@@ -45,13 +46,15 @@ class PostItem implements SitemapItemInterface {
 		$this->next_item_index = $data->next_item_index !== null ? (int) $data->next_item_index : null;
 	}
 
-	public static function compare( PostItem $a, PostItem $b ): int {
+	public static function compare_objects( PostItem $a, PostItem $b ): int {
 		$a_post = $a->get_object();
 		$b_post = $b->get_object();
 
-		return $a_post->post_modified_gmt === $b_post->post_modified_gmt
-			? $a_post->ID <=> $b_post->ID
-			: $a_post->post_modified_gmt <=> $b_post->post_modified_gmt;
+		if ( null === $a_post || null === $b_post ) {
+			return 0;
+		}
+
+		return SitemapProvider::compare_objects( $a_post, $b_post );
 	}
 
 	public function get_object() {
@@ -64,39 +67,39 @@ class PostItem implements SitemapItemInterface {
 	}
 
 	/**
-	 * @param \WP_Post|int $post
+	 * @param \WP_Post|int $object
 	 * @param Sitemap      $sitemap
 	 *
 	 * @return PostItem|null
 	 */
-	public static function for_post( $post, Sitemap $sitemap ): ?PostItem {
-		if ( ! $post instanceof \WP_Post ) {
-			$post = get_post( $post );
+	public static function for_object( $object, Sitemap $sitemap ): ?PostItem {
+		if ( is_int( $object ) ) {
+			$object = get_post( $object );
 		}
 
-		if ( ! $post ) {
+		if ( ! $object ) {
 			return null;
 		}
 
 		$data = [
-			'post_id'    => $post->ID,
-			'url'        => get_permalink( $post->ID ),
+			'post_id'    => $object->ID,
+			'url'        => get_permalink( $object->ID ),
 			'sitemap_id' => $sitemap->id,
 		];
 
-		$data['url'] = apply_filters( 'static_sitemap_post_url', $data['url'], $post );
+		$data['url'] = apply_filters( 'static_sitemap_post_url', $data['url'], $object );
 
-		if ( empty( $data['url'] ) ) {
+		if ( empty( $data['url'] ) || ! Url::is_site_url( $data['url'] ) ) {
 			return null;
 		}
 
-		$home_url_regex = preg_quote( untrailingslashit( home_url() ), '|' );
+		$data['url'] = Url::remove_home_url( $data['url'] );
 
-		if ( ! preg_match( "|^$home_url_regex(.+)$|", $data['url'], $matches ) ) {
+		$data = apply_filters( 'static_sitemap_post_item_data', $data, $object );
+
+		if ( ! is_array( $data ) || empty( $data['url'] ) ) {
 			return null;
 		}
-
-		$data['url'] = $matches[1];
 
 		return new PostItem( $data );
 	}
@@ -120,5 +123,16 @@ class PostItem implements SitemapItemInterface {
 			. "item_index: $this->item_index, "
 			. "next_item_index: $this->next_item_index"
 			. ' }';
+	}
+
+	public function get_field( string $field ) {
+		switch ( $field ) {
+			case 'id':
+				return $this->get_object_id();
+			case 'modified':
+				return $this->get_modified();
+			default:
+				return null;
+		}
 	}
 }

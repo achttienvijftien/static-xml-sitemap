@@ -51,7 +51,7 @@ trait ContainerTrait {
 		return key_exists( $name, $this->parameters );
 	}
 
-	protected function register( string $id, callable $factory ) {
+	protected function register( string $id, callable $factory ): void {
 		$this->factories[ $id ] = $factory;
 	}
 }

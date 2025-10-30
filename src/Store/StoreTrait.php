@@ -13,6 +13,7 @@ trait StoreTrait {
 
 	protected string $table;
 	protected array $field_types = [];
+	protected ?EntityCache $cache = null;
 
 	/**
 	 * @template T
@@ -21,7 +22,7 @@ trait StoreTrait {
 	 *
 	 * @param EntityInterface $entity
 	 *
-	 * @phpstan-return T
+	 * @phpstan-return T|false
 	 * @return EntityInterface|false
 	 */
 	public function insert( EntityInterface $entity ) {
@@ -37,6 +38,10 @@ trait StoreTrait {
 		}
 
 		$entity->set_id( $wpdb->insert_id );
+
+		if ( $this->cache ) {
+			$this->cache->add( $entity );
+		}
 
 		return $entity;
 	}
@@ -62,7 +67,13 @@ trait StoreTrait {
 			$where_format = $this->get_field_types( array_keys( $where ) );
 		}
 
-		return $wpdb->update( $this->table, $data, $where, $format, $where_format );
+		$update = $wpdb->update( $this->table, $data, $where, $format, $where_format );
+
+		if ( false !== $update && $this->cache ) {
+			$this->cache->clear();
+		}
+
+		return $update;
 	}
 
 	/**
@@ -85,7 +96,13 @@ trait StoreTrait {
 		$data = $entity->to_array();
 		unset( $data['id'] );
 
-		return $wpdb->update( $this->table, $data, [ 'id' => $id ] );
+		$update = $wpdb->update( $this->table, $data, [ 'id' => $id ] );
+
+		if ( false !== $update && $this->cache ) {
+			$this->cache->add( $entity );
+		}
+
+		return $update;
 	}
 
 	public function delete_where_id_in( array $ids ) {
@@ -100,7 +117,15 @@ trait StoreTrait {
 			$ids
 		);
 
-		return $wpdb->query( "DELETE FROM $this->table WHERE $where" );
+		$result = $wpdb->query( "DELETE FROM $this->table WHERE $where" );
+
+		if ( $this->cache ) {
+			foreach ( $ids as $id ) {
+				$this->cache->delete( $id );
+			}
+		}
+
+		return $result;
 	}
 
 	public function query( string $query, array $prepare = null ) {
@@ -111,6 +136,10 @@ trait StoreTrait {
 		}
 
 		return $wpdb->query( $query );
+	}
+
+	public function get_table(): string {
+		return $this->table;
 	}
 
 }

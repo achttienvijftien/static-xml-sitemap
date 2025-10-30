@@ -18,6 +18,7 @@ class Installer {
 		'sitemaps',
 		'sitemap_posts',
 		'sitemap_users',
+		'sitemap_terms',
 		'sitemap_jobs',
 	];
 
@@ -98,6 +99,8 @@ CREATE TABLE {$wpdb->prefix}sitemaps (
 	last_modified datetime,
 	last_object_id bigint(20),
 	last_item_index int unsigned,
+	last_indexed_value varchar(20),
+	last_indexed_id bigint(20),
 	status enum('unindexed', 'indexed', 'indexing', 'updating') NOT NULL,
 	item_count int default '0',
 	PRIMARY KEY  (id),
@@ -125,12 +128,26 @@ CREATE TABLE {$wpdb->prefix}sitemap_users (
 	KEY user_id (user_id),
 	KEY sitemap_id_item_index (sitemap_id,item_index)
 ) $charset_collate;
+CREATE TABLE {$wpdb->prefix}sitemap_terms (
+	id int unsigned NOT NULL auto_increment,
+	term_taxonomy_id bigint(20) unsigned NOT NULL,
+	sitemap_id int unsigned NOT NULL,
+	url varchar(2000) NOT NULL,
+	last_modified datetime,
+	last_modified_object_id bigint(20),
+	item_index int unsigned,
+	next_item_index int unsigned,
+	PRIMARY KEY  (id),
+	KEY term_taxonomy_id (term_taxonomy_id),
+	KEY last_modified_last_modified_object_id (last_modified, last_modified_object_id),
+	KEY sitemap_id_item_index (sitemap_id,item_index)
+) $charset_collate;
 CREATE TABLE {$wpdb->prefix}sitemap_jobs (
 	id int unsigned NOT NULL auto_increment,
 	sitemap_id int unsigned NOT NULL,
 	sitemap_item_id int unsigned,
 	object_id bigint(20) unsigned,
-	action enum('add_item', 'remove_item', 'reindex_item', 'reindex_sitemap') NOT NULL,
+	action enum('add_item', 'remove_item', 'reindex_item', 'reindex_sitemap', 'update_last_modified') NOT NULL,
 	scheduled_at datetime NOT NULL,
 	claim_id binary(16),
 	claimed_at datetime,

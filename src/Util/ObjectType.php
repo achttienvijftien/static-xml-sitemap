@@ -21,12 +21,20 @@ class ObjectType {
 			return 'user';
 		}
 
+		if ( $object instanceof \WP_Term ) {
+			return 'term';
+		}
+
 		return null;
 	}
 
 	public static function get_subtype( $object ): ?string {
 		if ( $object instanceof \WP_Post ) {
 			return $object->post_type;
+		}
+
+		if ( $object instanceof \WP_Term ) {
+			return $object->taxonomy;
 		}
 
 		return null;

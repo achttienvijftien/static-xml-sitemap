@@ -35,7 +35,7 @@ class Router {
 
 	public function add_hooks(): void {
 		add_action( 'init', [ $this, 'register_rewrites' ] );
-		add_action( 'template_redirect', [ $this, 'render_sitemaps' ] );
+		add_action( 'pre_get_posts', [ $this, 'render_sitemaps' ], 1 );
 		add_filter( 'redirect_canonical', [ $this, 'redirect_canonical' ] );
 	}
 
@@ -52,8 +52,16 @@ class Router {
 		return $redirect;
 	}
 
-	public function render_sitemaps() {
-		global $wp_query;
+	/**
+	 *
+	 * @param \WP_Query|mixed $query
+	 *
+	 * @return void
+	 */
+	public function render_sitemaps( $query ) {
+		if ( ! $query instanceof \WP_Query || ! $query->is_main_query() ) {
+			return;
+		}
 
 		$type = sanitize_text_field( get_query_var( 'static-sitemap' ) );
 
@@ -62,7 +70,7 @@ class Router {
 		}
 
 		if ( ! $this->sitemaps_enabled() ) {
-			$wp_query->set_404();
+			$query->set_404();
 			status_header( 404 );
 
 			return;
@@ -76,10 +84,12 @@ class Router {
 			exit();
 		}
 
+		do_action( 'static_sitemap_request', $query, $type, $paged );
+
 		$sitemap = $this->get_sitemap_for_type( $type );
 
 		if ( ! $sitemap ) {
-			$wp_query->set_404();
+			$query->set_404();
 			status_header( 404 );
 
 			return;

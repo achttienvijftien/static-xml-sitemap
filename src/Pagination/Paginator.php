@@ -18,17 +18,27 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Store\ItemStoreInterface;
  */
 class Paginator {
 
+	public const ORDER_ASCENDING  = 'ASC';
+	public const ORDER_DESCENDING = 'DESC';
+
 	private int $page_size;
 	private Sitemap $sitemap;
+	private string $order;
 	/**
 	 * @var ItemStoreInterface<T>
 	 */
 	private ItemStoreInterface $item_store;
 
-	public function __construct( Sitemap $sitemap, ItemStoreInterface $item_store, int $page_size ) {
+	public function __construct(
+		Sitemap $sitemap,
+		ItemStoreInterface $item_store,
+		int $page_size,
+		string $order
+	) {
 		$this->sitemap    = $sitemap;
 		$this->page_size  = $page_size;
 		$this->item_store = $item_store;
+		$this->order      = $order;
 	}
 
 	public function get_pages(): array {
@@ -65,6 +75,7 @@ class Paginator {
 		return $this->sitemap->object_subtype ?? $this->sitemap->object_type;
 	}
 
+	// fixme: assumes items ordered by modified date
 	public function get_last_modified( int $page ) {
 		$first_item = $this->get_first_item( $page );
 
@@ -93,9 +104,25 @@ class Paginator {
 	 * @return SitemapItemInterface[]
 	 */
 	public function get_items( int $page ): array {
-		return $this->item_store->where_item_index_lte(
-			$this->sitemap->last_item_index - ( $page - 1 ) * $this->page_size,
-			$this->page_size
+		if ( self::ORDER_DESCENDING === $this->order ) {
+			$compare = '<=';
+			$offset  = $this->sitemap->last_item_index - ( $page - 1 ) * $this->page_size;
+		}
+		if ( self::ORDER_ASCENDING === $this->order ) {
+			$compare = '>=';
+			$offset  = ( $page - 1 ) * $this->page_size;
+		}
+
+		if ( ! isset( $compare, $offset ) ) {
+			return [];
+		}
+
+		return $this->item_store->where_item_index_compare(
+			$this->sitemap->get_id(),
+			$compare,
+			$offset,
+			$this->page_size,
+			$this->order
 		);
 	}
 

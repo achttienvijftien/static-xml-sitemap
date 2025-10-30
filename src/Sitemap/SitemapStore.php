@@ -7,6 +7,7 @@
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap;
 
+use AchttienVijftien\Plugin\StaticXMLSitemap\Store\EntityCache;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Store\StoreTrait;
 
 /**
@@ -18,6 +19,7 @@ class SitemapStore {
 
 	public function __construct() {
 		global $wpdb;
+
 		$this->table       = "{$wpdb->prefix}sitemaps";
 		$this->field_types = [
 			'id'              => '%d',
@@ -29,10 +31,27 @@ class SitemapStore {
 			'status'          => '%s',
 			'item_count'      => '%d',
 		];
+
+		$this->cache = new EntityCache();
+		$this->cache->set_tagger(
+			fn( Sitemap $sitemap ) => [
+				'object_type' => implode( ':', array_filter( [ $sitemap->object_type, $sitemap->object_subtype ] ) ),
+			]
+		);
 	}
 
 	public function get_by_object_type( string $object_type, $object_subtype = null ): ?Sitemap {
 		global $wpdb;
+
+		$tag = [
+			'object_type' => implode( ':', array_filter( [ $object_type, $object_subtype ] ) ),
+		];
+
+		$sitemap = $this->cache->get_by_tag( $tag );
+
+		if ( $sitemap ) {
+			return $sitemap;
+		}
 
 		if ( $object_subtype ) {
 			$sitemap = $wpdb->get_row(
@@ -53,7 +72,15 @@ class SitemapStore {
 			)
 		);
 
-		return $sitemap ? new Sitemap( $sitemap ) : null;
+		if ( ! $sitemap ) {
+			return null;
+		}
+
+		$sitemap = new Sitemap( $sitemap );
+
+		$this->cache->add( $sitemap );
+
+		return $sitemap;
 	}
 
 	public function insert_sitemap( Sitemap $sitemap ) {
@@ -114,11 +141,28 @@ class SitemapStore {
 	public function get( int $id ): ?Sitemap {
 		global $wpdb;
 
+		$sitemap = $this->cache->get( $id );
+
+		if ( $sitemap ) {
+			return $sitemap;
+		}
+
 		$sitemap = $wpdb->get_row(
 			$wpdb->prepare( "SELECT * FROM $this->table WHERE id = %d", $id )
 		);
 
-		return $sitemap ? new Sitemap( $sitemap ) : null;
+		if ( ! $sitemap ) {
+			return null;
+		}
+
+		$sitemap = new Sitemap( $sitemap );
+		$this->cache->add( $sitemap );
+
+		return $sitemap;
+	}
+
+	public function invalidate_cache( int $sitemap_id ): void {
+		$this->cache->delete( $sitemap_id );
 	}
 
 }

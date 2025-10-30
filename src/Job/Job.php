@@ -19,10 +19,11 @@ class Job implements EntityInterface {
 
 	use EntityTrait;
 
-	public const ADD_ITEM        = 'add_item';
-	public const REMOVE_ITEM     = 'remove_item';
-	public const REINDEX_ITEM    = 'reindex_item';
-	public const REINDEX_SITEMAP = 'reindex_sitemap';
+	public const ADD_ITEM             = 'add_item';
+	public const REMOVE_ITEM          = 'remove_item';
+	public const REINDEX_ITEM         = 'reindex_item';
+	public const REINDEX_SITEMAP      = 'reindex_sitemap';
+	public const UPDATE_LAST_MODIFIED = 'update_last_modified';
 
 	public ?int $sitemap_id;
 	public ?int $sitemap_item_id;
@@ -80,6 +81,18 @@ class Job implements EntityInterface {
 				'sitemap_item_id' => $item->get_id(),
 				'object_id'       => $item->get_object_id(),
 				'action'          => self::REINDEX_ITEM,
+				'scheduled_at'    => current_time( 'mysql', true ),
+			]
+		);
+	}
+
+	public static function update_last_modified( SitemapItemInterface $item ): Job {
+		return new self(
+			[
+				'sitemap_id'      => $item->get_sitemap_id(),
+				'sitemap_item_id' => $item->get_id(),
+				'object_id'       => $item->get_object_id(),
+				'action'          => self::UPDATE_LAST_MODIFIED,
 				'scheduled_at'    => current_time( 'mysql', true ),
 			]
 		);

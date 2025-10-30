@@ -7,6 +7,7 @@
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Post;
 
+use AchttienVijftien\Plugin\StaticXMLSitemap\Pagination\Paginator;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapItemInterface;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Store\ItemStoreInterface;
@@ -39,6 +40,10 @@ class PostItemStore implements ItemStoreInterface {
 		$this->page_size        = $page_size;
 	}
 
+	protected function get_orderby(): string {
+		return apply_filters( 'static_sitemap_posts_orderby', 'id' );
+	}
+
 	public function get_index_for_item( SitemapItemInterface $item, Sitemap $sitemap, string $field = 'item_index' ): ?int {
 		global $wpdb;
 
@@ -52,17 +57,32 @@ class PostItemStore implements ItemStoreInterface {
 			return null;
 		}
 
+		$orderby = $this->get_orderby();
+
+		$posts_query = ( new Query( $post->post_type ) )
+			->set_after( $orderby, $item->get_field( $orderby ), $post->ID )
+			->set_orderby( $orderby )
+			->get_query_clauses();
+
+		$posts_from    = $posts_query['from'];
+		$posts_joins   = $posts_query['joins'] ?? '';
+		$posts_where   = isset( $posts_query['where'] ) ? ' AND ' . $posts_query['where'] : '';
+		$posts_orderby = $posts_query['orderby'] ?? '';
+
 		$target_item_index = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT si.%i 
 				 FROM $this->table si
-				 JOIN $wpdb->posts p ON si.post_id = p.ID
+				 JOIN $posts_from ON si.post_id = p.ID
+				 $posts_joins
 				 WHERE si.sitemap_id = %d 
 				 AND si.%i IS NOT NULL
-				 AND (p.post_modified_gmt, p.ID) > (%s, %d)
-				 ORDER BY p.post_modified_gmt, p.ID
+				 $posts_where
+				 ORDER BY $posts_orderby
 				 LIMIT 1",
+				$field,
 				$sitemap->id,
+				$field,
 				$post->post_modified_gmt,
 				$post->ID
 			)
@@ -76,19 +96,44 @@ class PostItemStore implements ItemStoreInterface {
 			return $items;
 		}
 
-		usort( $items, [ PostItem::class, 'compare' ] );
+		usort( $items, [ PostItem::class, 'compare_objects' ] );
 
 		return $items;
 	}
 
 	public function get( int $id ): ?PostItem {
-		global $wpdb;
-
-		$item = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM $this->table WHERE id = %d", $id )
-		);
+		$item = $this->get_by_id( $id );
 
 		return $item ? new PostItem( $item ) : null;
 	}
 
+	public function get_last_modified( Sitemap $sitemap ) {
+		global $wpdb;
+
+		$post_id = $wpdb->get_var(
+			( new Query( $sitemap->object_subtype ) )
+				->set_fields( [ 'id' ] )
+				->set_orderby( 'modified' )
+				->set_order( 'DESC' )
+				->set_sitemap( $sitemap->id )
+				->set_limit( 1 )
+		);
+
+		if ( ! $post_id ) {
+			return null;
+		}
+
+		return $this->get_one_by_object_id( $post_id );
+	}
+
+	public function get_object_query( string $object_subtype = null ): Query {
+		return new Query( $object_subtype );
+	}
+
+	public function paginate( Sitemap $sitemap ): Paginator {
+		$order = Paginator::ORDER_ASCENDING;
+		$order = apply_filters( 'static_sitemap_posts_pagination_order', $order );
+
+		return new Paginator( $sitemap, $this, $this->page_size, $order );
+	}
 }
