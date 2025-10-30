@@ -911,6 +911,10 @@ class WordPressSeo {
 			remove_action( 'after_setup_theme', [ $sitemaps, 'reduce_query_load' ], 99 );
 			remove_action( 'pre_get_posts', [ $sitemaps, 'redirect' ], 1 );
 			remove_action( 'wpseo_hit_sitemap_index', [ $sitemaps, 'hit_sitemap_index' ] );
+
+			if ( property_exists( $sitemaps, 'providers' ) ) {
+				$sitemaps->providers = [];
+			}
 		}
 
 		if ( $router instanceof \WPSEO_Sitemaps_Router ) {
