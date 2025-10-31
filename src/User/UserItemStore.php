@@ -58,7 +58,7 @@ class UserItemStore implements ItemStoreInterface {
 		return $items;
 	}
 
-	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
+	public function get_index_after_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
 		global $wpdb;
 
 		if ( ! $item instanceof UserItem ) {

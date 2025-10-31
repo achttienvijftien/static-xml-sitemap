@@ -62,7 +62,7 @@ interface ItemStoreInterface {
 	 *
 	 * @return int|null
 	 */
-	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int;
+	public function get_index_after_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int;
 
 	/**
 	 * Find Sitemap items by its object id.

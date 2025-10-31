@@ -44,7 +44,7 @@ class PostItemStore implements ItemStoreInterface {
 		return apply_filters( 'static_sitemap_posts_orderby', 'id' );
 	}
 
-	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
+	public function get_index_after_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
 		global $wpdb;
 
 		if ( ! $item instanceof PostItem ) {

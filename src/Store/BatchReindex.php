@@ -28,6 +28,10 @@ class BatchReindex {
 	 * @var SitemapItemInterface[]
 	 */
 	private array $remove = [];
+	/**
+	 * @var SitemapItemInterface[]
+	 */
+	private array $reindex = [];
 	private Logger $logger;
 	private array $offsets;
 	private bool $reindex_all = false;
@@ -40,8 +44,7 @@ class BatchReindex {
 	}
 
 	public function reindex( ...$items ): self {
-		$this->insert( ...$items );
-		$this->remove( ...$items );
+		array_push( $this->reindex, ...$items );
 
 		return $this;
 	}
@@ -100,6 +103,12 @@ class BatchReindex {
 
 		$logger = $this->logger->for_source( __METHOD__ );
 
+		$this->process_reindex();
+
+		if ( empty( $this->insert ) && empty( $this->remove ) ) {
+			return true;
+		}
+
 		$this->item_store->sort_by_object( $this->insert );
 		$this->item_store->sort_by_item_index( $this->remove );
 
@@ -124,7 +133,7 @@ class BatchReindex {
 
 		$inserts_by_index = [];
 		foreach ( $this->insert as $item ) {
-			$index = $this->item_store->get_index_for_item( $item, 'next_item_index' );
+			$index = $this->item_store->get_index_after_item( $item, 'next_item_index' );
 			if ( null === $index ) {
 				$index = $this->sitemap->last_item_index + 1;
 			}
@@ -272,5 +281,23 @@ class BatchReindex {
 		}
 
 		return $offset_for_index;
+	}
+
+	private function process_reindex(): void {
+		foreach ( $this->reindex as $item ) {
+			$item_index_after_item = $this->item_store->get_index_after_item( $item );
+
+			$item_index      = $item->get_item_index();
+			$next_item_index = null === $item_index_after_item
+				? $this->sitemap->last_item_index
+				: $item_index_after_item - 1;
+
+			if ( $item_index === $next_item_index ) {
+				continue;
+			}
+
+			$this->remove[] = $item;
+			$this->insert[] = $item;
+		}
 	}
 }
