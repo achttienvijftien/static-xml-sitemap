@@ -53,17 +53,16 @@ interface ItemStoreInterface {
 	public function sort_by_item_index( array &$objects ): array;
 
 	/**
-	 * Returns the item_index for object.
+	 * Returns the (next) item index of the sitemap item at which $item should be inserted.
 	 *
 	 * @phpstan-param  T           $item
 	 *
-	 * @param SitemapItemInterface $item
-	 * @param Sitemap              $sitemap
+	 * @param SitemapItemInterface $item Sitemap item.
 	 * @param string               $field
 	 *
 	 * @return int|null
 	 */
-	public function get_index_for_item( SitemapItemInterface $item, Sitemap $sitemap, string $field = 'item_index' ): ?int;
+	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int;
 
 	/**
 	 * Find Sitemap items by its object id.

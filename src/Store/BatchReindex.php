@@ -20,9 +20,6 @@ class BatchReindex {
 	private Sitemap $sitemap;
 	private SitemapStore $sitemap_store;
 	private ItemStoreInterface $item_store;
-
-	private int $item_count;
-
 	/**
 	 * @var SitemapItemInterface[]
 	 */
@@ -40,8 +37,6 @@ class BatchReindex {
 		$this->sitemap_store = $sitemap_store;
 		$this->sitemap       = $sitemap;
 		$this->logger        = $logger;
-
-		$this->item_count = $sitemap->item_count;
 	}
 
 	public function reindex( ...$items ): self {
@@ -52,14 +47,12 @@ class BatchReindex {
 	}
 
 	public function insert( ...$items ): self {
-		$this->item_count += count( $items );
 		array_push( $this->insert, ...$items );
 
 		return $this;
 	}
 
 	public function remove( ...$items ): self {
-		$this->item_count -= count( $items );
 		array_push( $this->remove, ...$items );
 
 		return $this;
@@ -131,9 +124,9 @@ class BatchReindex {
 
 		$inserts_by_index = [];
 		foreach ( $this->insert as $item ) {
-			$index = $this->item_store->get_index_for_item( $item, $this->sitemap, 'next_item_index' );
+			$index = $this->item_store->get_index_for_item( $item, 'next_item_index' );
 			if ( null === $index ) {
-				continue;
+				$index = $this->sitemap->last_item_index + 1;
 			}
 			$inserts_by_index[ $index ][] = $item;
 		}

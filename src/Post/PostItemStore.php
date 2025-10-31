@@ -44,7 +44,7 @@ class PostItemStore implements ItemStoreInterface {
 		return apply_filters( 'static_sitemap_posts_orderby', 'id' );
 	}
 
-	public function get_index_for_item( SitemapItemInterface $item, Sitemap $sitemap, string $field = 'item_index' ): ?int {
+	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
 		global $wpdb;
 
 		if ( ! $item instanceof PostItem ) {
@@ -81,14 +81,14 @@ class PostItemStore implements ItemStoreInterface {
 				 ORDER BY $posts_orderby
 				 LIMIT 1",
 				$field,
-				$sitemap->id,
+				$item->sitemap_id,
 				$field,
 				$post->post_modified_gmt,
 				$post->ID
 			)
 		);
 
-		return null !== $target_item_index ? (int) $target_item_index : $sitemap->item_count;
+		return null !== $target_item_index ? (int) $target_item_index : null;
 	}
 
 	public function sort_by_object( array &$items ): array {

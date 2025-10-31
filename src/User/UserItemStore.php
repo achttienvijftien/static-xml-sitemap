@@ -58,7 +58,7 @@ class UserItemStore implements ItemStoreInterface {
 		return $items;
 	}
 
-	public function get_index_for_item( SitemapItemInterface $item, Sitemap $sitemap, string $field = 'item_index' ): ?int {
+	public function get_index_for_item( SitemapItemInterface $item, string $field = 'item_index' ): ?int {
 		global $wpdb;
 
 		if ( ! $item instanceof UserItem ) {
@@ -95,12 +95,12 @@ class UserItemStore implements ItemStoreInterface {
 				 ORDER BY $users_orderby
 				 LIMIT 1",
 				$field,
-				$sitemap->id,
+				$item->sitemap_id,
 				$field
 			)
 		);
 
-		return null !== $target_item_index ? (int) $target_item_index : $sitemap->item_count;
+		return null !== $target_item_index ? (int) $target_item_index : null;
 	}
 
 	public function get_last_modified( Sitemap $sitemap ): ?UserItem {
