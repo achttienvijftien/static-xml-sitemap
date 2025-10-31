@@ -172,6 +172,10 @@ class BatchReindex {
 			$min_index = $offset_indexes[ $i ];
 			$max_index = null;
 
+			if ( $min_index > $this->sitemap->last_item_index ) {
+				continue;
+			}
+
 			if ( isset( $offset_indexes[ $i + 1 ] ) ) {
 				$max_index = $offset_indexes[ $i + 1 ] - 1;
 			}
