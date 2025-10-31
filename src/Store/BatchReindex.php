@@ -139,6 +139,7 @@ class BatchReindex {
 			array_fill( 0, count( $remove_indexes ), 1 )
 		);
 
+		// Find all item indexes that are offset by either inserts or removes.
 		$offset_indexes = array_unique( array_merge( array_keys( $inserts ), array_keys( $removes ) ) );
 
 		sort( $offset_indexes, SORT_NUMERIC );
@@ -146,6 +147,7 @@ class BatchReindex {
 		$offsets     = [];
 		$prev_offset = 0;
 
+		// Determine the offset amount for every offset index.
 		foreach ( $offset_indexes as $index ) {
 			$offsets[ $index ] = $prev_offset
 				+ ( $inserts[ $index ] ?? 0 )
@@ -154,10 +156,13 @@ class BatchReindex {
 			$prev_offset = $offsets[ $index ];
 		}
 
+		// Merge adjacent offsets where the offset amount is the same.
 		$this->offsets = $this->merge_duplicate_offsets( $offsets );
 
 		$offset_indexes = array_keys( $this->offsets );
 
+		// Shift the item indexes between the offset positions to account for removals or
+		// make room for insertions.
 		for ( $i = 0; $i < count( $offset_indexes ); $i++ ) {
 			$index_offset = $this->offsets[ $offset_indexes[ $i ] ];
 			if ( 0 === $index_offset ) {
@@ -193,6 +198,7 @@ class BatchReindex {
 			);
 		}
 
+		// Insert items at their insertion index, adjusted by the applicable index offsets.
 		foreach ( $inserts_by_index as $index => $items ) {
 			$insert_index = $index + $this->get_offset_for_index( $index - 1 );
 
@@ -210,6 +216,7 @@ class BatchReindex {
 			}
 		}
 
+		// Commit the new item index: item_index = next_item_index.
 		$result = $this->item_store->commit_next_index( $this->sitemap->id );
 
 		if ( false === $result ) {
@@ -225,6 +232,7 @@ class BatchReindex {
 		$this->item_store->update_sitemap_stats( $this->sitemap );
 		$this->sitemap_store->update_sitemap( $this->sitemap );
 
+		// Remove items that were removed in this update.
 		$this->item_store->delete_query(
 			[
 				'sitemap_id' => $this->sitemap->id,
