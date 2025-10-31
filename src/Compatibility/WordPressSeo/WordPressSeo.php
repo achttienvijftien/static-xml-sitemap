@@ -37,6 +37,7 @@ class WordPressSeo {
 	private TermItemStore $term_item_store;
 
 	private ?array $accessible_post_types = null;
+	private ?array $indexable_post_statuses = null;
 	private ?array $excluded_post_ids = null;
 	private ?array $excluded_term_ids = null;
 
@@ -192,6 +193,10 @@ class WordPressSeo {
 	public function post_indexable( $indexable, \WP_Post $post ) {
 		if ( ! $indexable ) {
 			return $indexable;
+		}
+
+		if ( ! $this->is_post_status_indexable( $post->post_status, $post->post_type ) ) {
+			return false;
 		}
 
 		if ( in_array( $post->ID, $this->get_excluded_post_ids( $post->post_type ) ) ) {
@@ -926,6 +931,32 @@ class WordPressSeo {
 
 		// Note: the sitemap cache used to be unhooked here as well, but we keep that in place
 		// for now to let the News sitemap (and its cache) to function as-is.
+	}
+
+	public function is_post_status_indexable( string $post_status, string $post_type ): bool {
+		$post_statuses = $this->get_indexable_post_statuses( $post_type );
+
+		return in_array( $post_status, $post_statuses, true );
+	}
+
+	protected function get_indexable_post_statuses( string $post_type ): array {
+		if ( isset( $this->indexable_post_statuses[ $post_type ] ) ) {
+			return $this->indexable_post_statuses[ $post_type ];
+		}
+
+		$post_statuses = apply_filters( 'wpseo_sitemap_post_statuses', [ 'publish' ], $post_type );
+
+		if ( ! is_array( $post_statuses ) || empty( $post_statuses ) ) {
+			$post_statuses = [ 'publish' ];
+		}
+
+		if ( $post_type === 'attachment' && ! in_array( 'inherit', $post_statuses, true ) ) {
+			$post_statuses[] = 'inherit';
+		}
+
+		$this->indexable_post_statuses[ $post_type ] = $post_statuses;
+
+		return $this->indexable_post_statuses[ $post_type ];
 	}
 
 }

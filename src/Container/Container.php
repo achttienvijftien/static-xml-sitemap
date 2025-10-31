@@ -304,7 +304,11 @@ class Container implements ContainerInterface {
 	 * @throws ServiceNotFoundException
 	 */
 	private function wpseo_post_watcher(): WpSeoPostWatcher {
-		return new WpSeoPostWatcher( $this->get( PostWatcher::class ) );
+		return new WpSeoPostWatcher(
+			$this->get( PostWatcher::class ),
+			$this->get( PostSitemapProvider::class ),
+			$this->get( PostItemStore::class ),
+		);
 	}
 
 }

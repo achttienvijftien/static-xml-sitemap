@@ -87,7 +87,7 @@ class SitemapProvider extends AbstractProvider implements ProviderInterface {
 		return apply_filters( 'static_sitemap_post_invalidations', $invalidations, $events );
 	}
 
-	protected function is_indexable( $object ) {
+	public function is_indexable( $object ) {
 		if ( ! $object instanceof \WP_Post ) {
 			return false;
 		}

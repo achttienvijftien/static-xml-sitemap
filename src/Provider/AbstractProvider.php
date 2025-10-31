@@ -145,7 +145,7 @@ abstract class AbstractProvider implements ProviderInterface {
 		return true;
 	}
 
-	abstract protected function is_indexable( $object );
+	abstract public function is_indexable( $object );
 
 	/**
 	 * @param \WP_Post|\WP_User|\WP_Term|int $object

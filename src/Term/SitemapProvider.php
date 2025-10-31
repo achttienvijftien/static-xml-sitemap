@@ -94,7 +94,7 @@ class SitemapProvider extends AbstractProvider implements ProviderInterface {
 		do_action( 'static_sitemap_terms_update_last_modified', $items );
 	}
 
-	protected function is_indexable( $object ) {
+	public function is_indexable( $object ) {
 		if ( ! $object instanceof \WP_Term ) {
 			return false;
 		}
