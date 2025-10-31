@@ -166,7 +166,7 @@ class BatchReindex {
 		$offset_indexes = array_keys( $this->offsets );
 
 		for ( $i = 0; $i < count( $offset_indexes ); $i++ ) {
-			$index_offset = $offsets[ $offset_indexes[ $i ] ];
+			$index_offset = $this->offsets[ $offset_indexes[ $i ] ];
 			if ( 0 === $index_offset ) {
 				continue;
 			}
