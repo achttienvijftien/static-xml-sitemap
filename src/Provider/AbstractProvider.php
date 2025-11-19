@@ -115,6 +115,8 @@ abstract class AbstractProvider implements ProviderInterface {
 	}
 
 	protected function append_to_sitemap( SitemapItemInterface $item, int $sitemap_id ) {
+		$logger = $this->logger->for_source( __METHOD__ );
+		$this->sitemap_store->invalidate_cache( $sitemap_id );
 		$sitemap = $this->sitemap_store->get( $sitemap_id );
 
 		if ( ! $sitemap ) {
@@ -122,7 +124,9 @@ abstract class AbstractProvider implements ProviderInterface {
 		}
 
 		if ( $sitemap->is_updating() ) {
-			return false;
+			$logger->warning( "$sitemap has stale UPDATING status, restoring status to INDEXED" );
+			$sitemap->status = Sitemap::STATUS_INDEXED;
+			$this->sitemap_store->update_sitemap( $sitemap );
 		}
 
 		if ( $sitemap->last_object_id && $this->compare_objects( $item->get_object(), $sitemap->last_object_id ) < 0 ) {
@@ -221,7 +225,8 @@ abstract class AbstractProvider implements ProviderInterface {
 	}
 
 	protected function run_jobs_for_sitemap( int $sitemap_id ) {
-		$logger  = $this->logger->for_source( __METHOD__ );
+		$logger = $this->logger->for_source( __METHOD__ );
+		$this->sitemap_store->invalidate_cache( $sitemap_id );
 		$sitemap = $this->sitemap_store->get( $sitemap_id );
 
 		if ( ! $sitemap ) {
@@ -229,9 +234,9 @@ abstract class AbstractProvider implements ProviderInterface {
 		}
 
 		if ( $sitemap->is_updating() ) {
-			$logger->warning( "$sitemap is already being updated. Skipping" );
-
-			return 0;
+			$logger->warning( "$sitemap has stale UPDATING status, restoring status to INDEXED" );
+			$sitemap->status = Sitemap::STATUS_INDEXED;
+			$this->sitemap_store->update_sitemap( $sitemap );
 		}
 
 		$runner = new JobRunner( $this->job_store, $this->item_store, $sitemap, $this->logger );
