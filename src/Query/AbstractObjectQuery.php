@@ -22,6 +22,7 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 	public ?string $orderby = null;
 	public string $order = 'ASC';
 	public ?int $sitemap = null;
+	public ?array $item_index = null;
 
 	abstract protected function get_clauses(): array;
 
@@ -90,6 +91,12 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		return $this;
 	}
 
+	public function set_item_index( string $operator, ...$value ): AbstractObjectQuery {
+		$this->item_index = compact( 'operator', 'value' );
+
+		return $this;
+	}
+
 	public function get_query(): string {
 		$clauses = $this->get_query_clauses();
 
@@ -134,11 +141,19 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 			$select[] = $this->get_row_number_sql( $clauses['orderby'] );
 		}
 
+		if ( $this->item_index && $this->sitemap ) {
+			$clauses['where']['item_index'] = $this->get_item_index_clause();
+		}
+
 		$select  = implode( ', ', $select );
 		$where   = $this->get_where_clause( $clauses['where'] );
 		$join    = implode( "\n", $clauses['join'] );
-		$orderby = implode( ', ', $clauses['orderby'] );
+		$orderby = $clauses['orderby'];
 		$limit   = $clauses['limits'];
+
+		if ( ! empty( $orderby ) && 'DESC' === strtoupper( $this->order ) ) {
+			$orderby = array_map( fn( $column ) => "$column DESC", $orderby );
+		}
 
 		$query = [
 			'select' => $select,
@@ -154,10 +169,7 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		}
 
 		if ( ! empty( $orderby ) ) {
-			$query['orderby'] = $orderby;
-			if ( 'DESC' === strtoupper( $this->order ) ) {
-				$query['orderby'] .= ' DESC';
-			}
+			$query['orderby'] = implode( ', ', $orderby );
 		}
 
 		if ( ! empty( $limit ) ) {
@@ -264,5 +276,40 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		$format = is_int( $after['value'] ) ? '%d' : '%s';
 
 		return $wpdb->prepare( "($field, $id) > ($format, %d)", $after['value'], $after['id'] );
+	}
+
+	private function get_item_index_clause(): ?string {
+		global $wpdb;
+
+		$operator = $this->item_index['operator'] ?? '';
+		$value    = $this->item_index['value'] ?? [];
+
+		if ( empty( $operator ) || empty( $value ) ) {
+			return null;
+		}
+
+		if ( ! preg_match( '/^<=?|>=?|=|BETWEEN$/i', $operator ) ) {
+			return null;
+		}
+
+		$operator = strtoupper( $operator );
+
+		if ( 'BETWEEN' === $operator && count( $value ) !== 2 ) {
+			return null;
+		}
+
+		if ( 'BETWEEN' === $operator ) {
+			$format = array_map( fn( $v ) => is_int( $v ) ? '%d' : '%s', $value );
+
+			return $wpdb->prepare(
+				"si.item_index BETWEEN $format[0] AND $format[1]",
+				$value[0],
+				$value[1]
+			);
+		}
+
+		$format = is_int( $value[0] ) ? '%d' : '%s';
+
+		return $wpdb->prepare( "si.item_index $operator $format", $value[0] );
 	}
 }

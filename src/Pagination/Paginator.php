@@ -75,24 +75,76 @@ class Paginator {
 		return $this->sitemap->object_subtype ?? $this->sitemap->object_type;
 	}
 
-	// fixme: assumes items ordered by modified date
-	public function get_last_modified( int $page ) {
-		$first_item = $this->get_first_item( $page );
+	public function get_last_modified( int $page ): ?string {
+		global $wpdb;
 
-		return $first_item ? $first_item->get_modified() : null;
+		$item_order = $this->item_store->get_orderby();
+
+		if ( 'modified' === $item_order ) {
+			// Easy case: item index reflects modified order.
+			$last_modified = $this->item_store->get_by_item_index(
+				$this->sitemap,
+				$this->is_order_desc()
+					? $this->get_first_item_index( $page )
+					: $this->get_last_item_index( $page )
+			);
+
+			return $last_modified ? $last_modified->get_modified() : null;
+		}
+
+		// Otherwise: find max modified date in page window.
+		$item_index_range = [
+			$this->get_first_item_index( $page ),
+			$this->get_last_item_index( $page ),
+		];
+
+		if ( ! isset( $item_index_range[0], $item_index_range[1] ) ) {
+			return null;
+		}
+
+		sort( $item_index_range, SORT_NUMERIC );
+
+		$query = $this->item_store->get_object_query( $this->sitemap->object_subtype )
+			->set_fields( [ 'modified' ] )
+			->set_sitemap( $this->sitemap->id )
+			->set_item_index( 'BETWEEN', ...$item_index_range )
+			->set_hide_empty( false )
+			->set_orderby( 'modified' )
+			->set_order( 'DESC' )
+			->set_limit( 1 )
+			->get_query();
+
+		return $wpdb->get_var( $query );
 	}
 
-	/**
-	 * @param int $page
-	 *
-	 * @phpstan-return T|null
-	 * @return SitemapItemInterface|null
-	 */
-	public function get_first_item( int $page ): ?SitemapItemInterface {
-		return $this->item_store->get_by_item_index(
-			$this->sitemap,
-			$this->sitemap->last_item_index - ( $page - 1 ) * $this->page_size
-		);
+	private function get_first_item_index( int $page ): ?int {
+		$offset = ( $page - 1 ) * $this->page_size;
+
+		if ( $this->is_order_desc() ) {
+			$item_index = $this->sitemap->last_item_index - $offset;
+
+			return $item_index < 0 ? null : $item_index;
+		}
+
+		return $offset > $this->sitemap->last_item_index ? null : $offset;
+	}
+
+	private function get_last_item_index( int $page ): ?int {
+		$first_item_index = $this->get_first_item_index( $page );
+
+		if ( null === $first_item_index ) {
+			return null;
+		}
+
+		if ( $this->is_order_desc() ) {
+			return max( 0, $first_item_index - $this->page_size + 1 );
+		}
+
+		return min( $first_item_index + $this->page_size - 1, $this->sitemap->last_item_index );
+	}
+
+	private function is_order_desc(): bool {
+		return self::ORDER_DESCENDING === $this->order;
 	}
 
 	/**
@@ -104,16 +156,10 @@ class Paginator {
 	 * @return SitemapItemInterface[]
 	 */
 	public function get_items( int $page ): array {
-		if ( self::ORDER_DESCENDING === $this->order ) {
-			$compare = '<=';
-			$offset  = $this->sitemap->last_item_index - ( $page - 1 ) * $this->page_size;
-		}
-		if ( self::ORDER_ASCENDING === $this->order ) {
-			$compare = '>=';
-			$offset  = ( $page - 1 ) * $this->page_size;
-		}
+		$compare = $this->is_order_desc() ? '<=' : '>=';
+		$offset  = $this->get_first_item_index( $page );
 
-		if ( ! isset( $compare, $offset ) ) {
+		if ( null === $offset ) {
 			return [];
 		}
 

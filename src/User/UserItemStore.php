@@ -38,7 +38,7 @@ class UserItemStore implements ItemStoreInterface {
 		$this->page_size        = $page_size;
 	}
 
-	protected function get_orderby(): string {
+	public function get_orderby(): string {
 		return apply_filters( 'static_sitemap_authors_orderby', 'user_login' );
 	}
 

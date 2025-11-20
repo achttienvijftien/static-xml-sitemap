@@ -152,4 +152,6 @@ interface ItemStoreInterface {
 	 * @return PostQuery|TermQuery|UserQuery
 	 */
 	public function get_object_query( string $object_subtype = null ): ObjectQueryInterface;
+
+	public function get_orderby(): string;
 }
