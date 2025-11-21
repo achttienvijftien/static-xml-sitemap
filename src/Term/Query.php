@@ -59,11 +59,11 @@ class Query extends AbstractObjectQuery implements ObjectQueryInterface {
 
 		$hierarchical = $this->hierarchical && is_taxonomy_hierarchical( $this->taxonomy );
 
-		if ( $this->hide_empty && ! $hierarchical ) {
+		if ( true === $this->indexable && $this->hide_empty && ! $hierarchical ) {
 			$where['hide_empty'] = 'tt.count > 0';
 		}
 
-		if ( $this->hide_empty && $hierarchical ) {
+		if ( true === $this->indexable && $this->hide_empty && $hierarchical ) {
 			$terms = $this->cache->get_hierarchical_term_count( $this->taxonomy );
 			$terms = array_filter( $terms, fn( $term ) => $term['count'] > 0 );
 

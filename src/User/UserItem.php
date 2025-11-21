@@ -122,12 +122,10 @@ class UserItem implements SitemapItemInterface {
 				return $this->get_object_id();
 			case 'modified':
 				return $this->get_modified();
-			case 'user_login':
+			default:
 				$user = $this->get_object();
 
-				return $user ? $user->user_login : null;
-			default:
-				return null;
+				return $user && property_exists( $user, $field ) ? $user->$field : null;
 		}
 	}
 }

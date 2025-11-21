@@ -60,12 +60,12 @@ class PostItemStore implements ItemStoreInterface {
 		$orderby = $this->get_orderby();
 
 		$posts_query = ( new Query( $post->post_type ) )
-			->set_after( $orderby, $item->get_field( $orderby ), $post->ID )
+			->set_after( $orderby, $item, $post->ID )
 			->set_orderby( $orderby )
 			->get_query_clauses();
 
 		$posts_from    = $posts_query['from'];
-		$posts_joins   = $posts_query['joins'] ?? '';
+		$posts_joins   = $posts_query['join'] ?? '';
 		$posts_where   = isset( $posts_query['where'] ) ? ' AND ' . $posts_query['where'] : '';
 		$posts_orderby = $posts_query['orderby'] ?? '';
 
@@ -76,15 +76,13 @@ class PostItemStore implements ItemStoreInterface {
 				 JOIN $posts_from ON si.post_id = p.ID
 				 $posts_joins
 				 WHERE si.sitemap_id = %d 
-				 AND si.%i IS NOT NULL
-				 $posts_where
+				  AND si.%i IS NOT NULL
+				  $posts_where
 				 ORDER BY $posts_orderby
 				 LIMIT 1",
 				$field,
 				$item->sitemap_id,
-				$field,
-				$post->post_modified_gmt,
-				$post->ID
+				$field
 			)
 		);
 

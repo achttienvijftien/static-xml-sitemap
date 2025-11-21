@@ -133,12 +133,10 @@ class TermItem implements SitemapItemInterface {
 				return $this->get_object_id();
 			case 'modified':
 				return $this->get_modified();
-			case 'term_id':
+			default:
 				$term = $this->get_object();
 
-				return $term ? $term->term_id : false;
-			default:
-				return null;
+				return $term && property_exists( $term, $field ) ? $term->$field : null;
 		}
 	}
 }

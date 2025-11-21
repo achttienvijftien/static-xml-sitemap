@@ -65,6 +65,7 @@ class UserItemStore implements ItemStoreInterface {
 			return null;
 		}
 
+		/** @var \WP_User $user */
 		$user = $item->get_object();
 
 		if ( ! $user ) {

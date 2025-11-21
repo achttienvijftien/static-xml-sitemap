@@ -53,6 +53,7 @@ class TermItemStore implements ItemStoreInterface {
 			return null;
 		}
 
+		/** @var \WP_Term $term */
 		$term = $item->get_object();
 
 		if ( ! $term ) {
@@ -62,12 +63,13 @@ class TermItemStore implements ItemStoreInterface {
 		$orderby = apply_filters( 'static_sitemap_terms_orderby', 'term_id' );
 
 		$terms_query = ( new Query( $term->taxonomy ) )
-			->set_after( $orderby, $item, $term->ID )
+			->set_fields( [ 'id' ] )
+			->set_after( $orderby, $item, $term->term_taxonomy_id )
 			->set_orderby( $orderby )
 			->get_query_clauses();
 
 		$terms_from    = $terms_query['from'];
-		$terms_joins   = $terms_query['joins'] ?? '';
+		$terms_joins   = $terms_query['join'] ?? '';
 		$terms_where   = isset( $terms_query['where'] ) ? ' AND ' . $terms_query['where'] : '';
 		$terms_orderby = $terms_query['orderby'] ?? '';
 
@@ -78,15 +80,13 @@ class TermItemStore implements ItemStoreInterface {
 				 JOIN $terms_from ON si.term_taxonomy_id = tt.term_taxonomy_id
 				 $terms_joins
 				 WHERE si.sitemap_id = %d 
-				 AND si.%i IS NOT NULL
-				 $terms_where
+				  AND si.%i IS NOT NULL
+				  $terms_where
 				 ORDER BY $terms_orderby
 				 LIMIT 1",
 				$field,
 				$item->sitemap_id,
-				$field,
-				$term->term_modified_gmt,
-				$term->ID
+				$field
 			)
 		);
 

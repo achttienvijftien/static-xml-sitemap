@@ -132,7 +132,9 @@ class PostItem implements SitemapItemInterface {
 			case 'modified':
 				return $this->get_modified();
 			default:
-				return null;
+				$post = $this->get_object();
+
+				return $post && property_exists( $post, $field ) ? $post->$field : null;
 		}
 	}
 }
