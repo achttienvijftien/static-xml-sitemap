@@ -9,6 +9,7 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Compatibility\WordPressSeo;
 
 use AchttienVijftien\Plugin\StaticXMLSitemap\Post\Query as PostQuery;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Term\Query as TermQuery;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Term\TermCache;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Term\TermItem;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Term\TermItemStore;
 use AchttienVijftien\Plugin\StaticXMLSitemap\User\Query as UserQuery;
@@ -40,6 +41,7 @@ class WordPressSeo {
 	private ?array $indexable_post_statuses = null;
 	private ?array $excluded_post_ids = null;
 	private ?array $excluded_term_ids = null;
+	private TermCache $term_cache;
 
 	public function __construct(
 		PostWatcher $post_watcher,
@@ -55,6 +57,7 @@ class WordPressSeo {
 		$this->term_indexer    = $term_indexer;
 		$this->term_watcher    = $term_watcher;
 		$this->term_item_store = $term_item_store;
+		$this->term_cache      = new TermCache();
 	}
 
 	public function add_hooks(): void {
@@ -704,7 +707,26 @@ class WordPressSeo {
 			return false;
 		}
 
-		// todo: add empty check + hierarchical
+		$hide_empty     = apply_filters( 'wpseo_sitemap_exclude_empty_terms', true, [ $term->taxonomy ] );
+		$hide_empty_tax = apply_filters( 'wpseo_sitemap_exclude_empty_terms_taxonomy', $hide_empty, $term->taxonomy );
+
+		if ( ! $hide_empty_tax ) {
+			return $indexable;
+		}
+
+		$hierarchical = is_taxonomy_hierarchical( $term->taxonomy );
+
+		if ( ! $hierarchical ) {
+			return $term->count > 0;
+		}
+
+		$counts = $this->term_cache->get_hierarchical_term_count( $term->taxonomy );
+
+		foreach ( $counts as ['term_id' => $term_id, 'count' => $count] ) {
+			if ( $term_id === $term->term_id ) {
+				return $count > 0;
+			}
+		}
 
 		return true;
 	}
