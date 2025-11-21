@@ -84,8 +84,9 @@ abstract class AbstractProvider implements ProviderInterface {
 		}
 
 		$object_type = ObjectType::get_type( $object );
+		$object_id   = $object instanceof \WP_Term ? $object->term_taxonomy_id : $object->ID;
 
-		$logger->debug( "Adding $object_type $object->ID to sitemap" );
+		$logger->debug( "Adding $object_type $object_id to sitemap" );
 
 		$force_queue_add = apply_filters( 'static_sitemap_force_queue_add', false, $object_type );
 
@@ -105,13 +106,13 @@ abstract class AbstractProvider implements ProviderInterface {
 		}
 
 		if ( ! $appended ) {
-			$logger->debug( "Failed to append item, queue add $object->ID to sitemap" );
-			$this->job_store->insert_job( Job::add_item( $item->sitemap_id, $object->ID ) );
+			$logger->debug( "Failed to append item, queue add $object_type $object_id to sitemap" );
+			$this->job_store->insert_job( Job::add_item( $item->sitemap_id, $object_id ) );
 
 			return;
 		}
 
-		$logger->debug( "Appended $object_type $object->ID to sitemap" );
+		$logger->debug( "Appended $object_type $object_id to sitemap" );
 	}
 
 	protected function append_to_sitemap( SitemapItemInterface $item, int $sitemap_id ) {
