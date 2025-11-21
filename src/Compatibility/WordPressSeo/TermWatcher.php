@@ -19,6 +19,7 @@ class TermWatcher {
 	public const NOINDEX_META_UPDATED       = 1 << 10;
 	public const CANONICAL_META_UPDATED     = 1 << 11;
 	public const TERM_LAST_MODIFIED_UPDATED = 1 << 12;
+	public const CHILD_TERM_COUNT_UPDATED   = 1 << 13;
 
 	private Watcher $watcher;
 	private SitemapProvider $provider;
@@ -48,6 +49,7 @@ class TermWatcher {
 		add_action( 'added_term_relationship', [ $this, 'added_term_relationship' ], 10, 3 );
 		add_action( 'delete_term_relationships', [ $this, 'delete_term_relationships' ], 10, 3 );
 		add_action( 'post_updated', [ $this, 'post_updated' ], 10, 3 );
+		add_action( 'edited_term_taxonomy', [ $this, 'edited_term_taxonomy' ], 10, 3 );
 	}
 
 	public function updated_term_meta( $meta_id, $object_id, $meta_key, $meta_value ): void {
@@ -220,6 +222,49 @@ class TermWatcher {
 			|| ! $is_viewable && $item->last_modified_object_id === $post->ID
 		) {
 			$this->watcher->add_events( $term->term_taxonomy_id, self::TERM_LAST_MODIFIED_UPDATED );
+		}
+	}
+
+	/**
+	 * @param int|mixed   $term Term taxonomy id
+	 * @param string      $taxonomy
+	 * @param array|mixed $args If called by wp_update_term(), args passed to the function.
+	 *
+	 * @return void
+	 */
+	public function edited_term_taxonomy( $term, string $taxonomy, $args = null ) {
+		if ( null !== $args ) {
+			return;
+		}
+
+		if ( ! $this->provider->taxonomy_has_sitemap( $taxonomy ) ) {
+			return;
+		}
+
+		if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
+			return;
+		}
+
+		$hide_empty     = apply_filters( 'wpseo_sitemap_exclude_empty_terms', true, [ $taxonomy ] );
+		$hide_empty_tax = apply_filters( 'wpseo_sitemap_exclude_empty_terms_taxonomy', $hide_empty, $taxonomy );
+
+		if ( ! $hide_empty_tax ) {
+			return;
+		}
+
+		$term = get_term_by( 'term_taxonomy_id', $term );
+
+		if ( ! $term ) {
+			return;
+		}
+
+		while ( ! empty( $term->parent ) ) {
+			$parent = get_term( $term->parent, $taxonomy );
+			if ( ! $parent ) {
+				break;
+			}
+			$this->watcher->add_events( $parent->term_taxonomy_id, self::CHILD_TERM_COUNT_UPDATED );
+			$term = $parent;
 		}
 	}
 }

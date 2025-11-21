@@ -784,6 +784,9 @@ class WordPressSeo {
 		if ( $events & TermWatcher::TERM_LAST_MODIFIED_UPDATED ) {
 			$invalidations |= Invalidations::ITEM_LAST_MODIFIED;
 		}
+		if ( $events & TermWatcher::CHILD_TERM_COUNT_UPDATED ) {
+			$invalidations |= Invalidations::IS_INDEXABLE;
+		}
 
 		return $invalidations;
 	}
