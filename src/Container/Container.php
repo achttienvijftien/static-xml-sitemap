@@ -201,6 +201,7 @@ class Container implements ContainerInterface {
 			$this->get( PostSitemapProvider::class ),
 			$this->get( UserSitemapProvider::class ),
 			$this->get( TermSitemapProvider::class ),
+			$this->get( Installer::class )
 		);
 	}
 

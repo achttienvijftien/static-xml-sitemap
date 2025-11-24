@@ -7,12 +7,14 @@
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap;
 
+use AchttienVijftien\Plugin\StaticXMLSitemap\Lock\Lock;
+
 /**
  * Class Installer
  */
 class Installer {
 
-	private const DB_VERSION = 1;
+	private const DB_VERSION = 2;
 
 	private const TABLES = [
 		'sitemaps',
@@ -24,6 +26,7 @@ class Installer {
 
 	public function add_hooks(): void {
 		add_action( 'wpmu_drop_tables', [ $this, 'wpmu_drop_tables' ] );
+		add_action( 'admin_init', [ $this, 'maybe_upgrade' ] );
 	}
 
 	public function wpmu_drop_tables( $tables ) {
@@ -55,6 +58,46 @@ class Installer {
 		}
 
 		delete_option( 'static_sitemap_install_errors' );
+	}
+
+	public function maybe_upgrade(): void {
+		if ( wp_doing_ajax() ) {
+			return;
+		}
+
+		if ( $this->is_installed() && $this->get_db_version() < self::DB_VERSION ) {
+			$this->upgrade();
+		}
+	}
+
+	private function is_installed(): bool {
+		return $this->get_db_version() > 0;
+	}
+
+	private function get_db_version(): int {
+		return (int) get_option( 'static_sitemap_db_version', 0 );
+	}
+
+	public function upgrade(): void {
+		if ( ! $this->is_installed() || $this->get_db_version() >= self::DB_VERSION ) {
+			return;
+		}
+
+		$lock = ( new Lock( 'upgrade_db' ) )->set_wait( 0 );
+
+		if ( ! $lock->acquire() ) {
+			return;
+		}
+
+		$release_lock = function () use ( $lock ) {
+			$lock->release();
+		};
+
+		add_action( 'shutdown', $release_lock );
+		dbDelta( $this->get_schema() );
+		update_option( 'static_sitemap_db_version', self::DB_VERSION, false );
+		$release_lock();
+		remove_action( 'shutdown', $release_lock );
 	}
 
 	protected function install_tables() {
@@ -99,9 +142,9 @@ CREATE TABLE {$wpdb->prefix}sitemaps (
 	last_modified datetime,
 	last_object_id bigint(20),
 	last_item_index int unsigned,
-	last_indexed_value varchar(20),
+	last_indexed_value varchar(200),
 	last_indexed_id bigint(20),
-	status enum('unindexed', 'indexed', 'indexing', 'updating') NOT NULL,
+	status enum('unindexed','indexed','indexing','updating') NOT NULL,
 	item_count int default '0',
 	PRIMARY KEY  (id),
 	UNIQUE KEY object_type_subtype (object_type,object_subtype)
@@ -147,7 +190,7 @@ CREATE TABLE {$wpdb->prefix}sitemap_jobs (
 	sitemap_id int unsigned NOT NULL,
 	sitemap_item_id int unsigned,
 	object_id bigint(20) unsigned,
-	action enum('add_item', 'remove_item', 'reindex_item', 'reindex_sitemap', 'update_last_modified') NOT NULL,
+	action enum('add_item','remove_item','reindex_item','reindex_sitemap','update_last_modified') NOT NULL,
 	scheduled_at datetime NOT NULL,
 	claim_id binary(16),
 	claimed_at datetime,

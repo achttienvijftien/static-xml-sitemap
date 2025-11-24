@@ -22,15 +22,18 @@ class Cli {
 	private PostProvider $post_provider;
 	private UserProvider $user_provider;
 	private TermProvider $term_provider;
+	private Installer $installer;
 
 	public function __construct(
 		PostProvider $post_provider,
 		UserProvider $user_provider,
-		TermProvider $term_provider
+		TermProvider $term_provider,
+		Installer $installer
 	) {
 		$this->post_provider = $post_provider;
 		$this->user_provider = $user_provider;
 		$this->term_provider = $term_provider;
+		$this->installer     = $installer;
 	}
 
 	public static function is_wp_cli(): bool {
@@ -47,13 +50,17 @@ class Cli {
 				\WP_CLI::add_command( 'sitemap', CommandNamespace::class );
 			}
 
+			$args = [ 'before_invoke' => fn() => $this->installer->maybe_upgrade() ];
+
 			\WP_CLI::add_command(
 				'sitemap create-index',
-				new CreateIndex( $this->post_provider, $this->user_provider, $this->term_provider )
+				new CreateIndex( $this->post_provider, $this->user_provider, $this->term_provider ),
+				$args
 			);
 			\WP_CLI::add_command(
 				'sitemap jobs run',
-				new RunJobs( $this->post_provider, $this->user_provider, $this->term_provider )
+				new RunJobs( $this->post_provider, $this->user_provider, $this->term_provider ),
+				$args
 			);
 		} catch ( \Exception $e ) {
 			\WP_CLI::warning( $e->getMessage() );
