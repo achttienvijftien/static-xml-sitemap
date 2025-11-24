@@ -186,7 +186,14 @@ abstract class AbstractIndexer {
 				$sitemap->last_indexed_value = $last_indexed_value;
 				$sitemap->last_indexed_id    = $last_indexed_id;
 				$sitemap->item_count++;
-				$this->sitemap_store->update_sitemap( $sitemap );
+
+				if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
+					$logger->warning(
+						"Error updating sitemap after inserting item for $object_type $object_id: $wpdb->last_error"
+					);
+					$error = true;
+					break 2;
+				}
 
 				$item_index++;
 			}
@@ -196,7 +203,11 @@ abstract class AbstractIndexer {
 
 		if ( ! $error ) {
 			$sitemap->status = Sitemap::STATUS_INDEXED;
-			$this->sitemap_store->update_sitemap( $sitemap );
+			if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
+				$logger->warning(
+					"Error updating sitemap after indexing: $wpdb->last_error"
+				);
+			}
 		}
 
 		$this->after_index( $sitemap_id, $total_items_inserted );
