@@ -7,4 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[unreleased]: todo
+## [1.0.0] 2025-12-04
+
+Initial release
+
+[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.0.0...main
+
+[1.0.0] https://github.com/achttienvijftien/static-xml-sitemap/compare/fa9730d...1.0.0
+
+
+
