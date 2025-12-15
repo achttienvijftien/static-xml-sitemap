@@ -12,24 +12,21 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Lock;
  */
 class Lock {
 
-	private string $name;
+	private const MAX_LOCK_AGE = 60 * 5;
+	private const MAX_TRIES    = 10;
+	private const DEFAULT_WAIT = 60;
 
+	private string $name;
 	private bool $have_lock = false;
-	private int $wait = 60;
-	private int $max_lock_age;
-	private int $max_tries;
+	private int $wait = self::DEFAULT_WAIT;
 
 	/**
 	 * Lock constructor.
 	 *
 	 * @param string $name Name of the lock.
-	 * @param int    $max_lock_age Max age (in seconds) after which the lock is considered dead.
-	 * @param int    $max_tries How many times should there be tried to acquire a lock.
 	 */
-	public function __construct( string $name, int $max_lock_age = 60, int $max_tries = 10 ) {
-		$this->max_tries    = $max_tries;
-		$this->max_lock_age = $max_lock_age;
-		$this->name         = "sitemap_lock_$name";
+	public function __construct( string $name ) {
+		$this->name = "sitemap_lock_$name";
 	}
 
 	/**
@@ -94,7 +91,7 @@ class Lock {
 
 			$lock_age = $lock_time ? $now - $lock_time : null;
 
-			if ( null !== $lock_age && $lock_age > $this->max_lock_age ) {
+			if ( null !== $lock_age && $lock_age > self::MAX_LOCK_AGE ) {
 				$this->release( $lock_time, true );
 			}
 
@@ -121,22 +118,13 @@ class Lock {
 
 			$time_wait *= 2;
 			$tries++;
-		} while ( ( $now - $time_start < $wait ) && $tries < $this->max_tries );
+		} while ( ( $now - $time_start < $wait ) && $tries < self::MAX_TRIES );
 
 		$wpdb->suppress_errors( $suppress_errors );
 
 		$this->have_lock = $acquired;
 
 		return $acquired;
-	}
-
-	/**
-	 * Returns true if we currently have the lock.
-	 *
-	 * @return bool
-	 */
-	public function have_lock(): bool {
-		return $this->have_lock;
 	}
 
 	public function set_wait( int $wait ): Lock {
