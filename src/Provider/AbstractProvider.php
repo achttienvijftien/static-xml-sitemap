@@ -83,6 +83,18 @@ abstract class AbstractProvider implements ProviderInterface {
 			return;
 		}
 
+		$sitemap = $this->sitemap_store->get( $item->sitemap_id );
+
+		if ( null === $sitemap ) {
+			$logger->warning( "Sitemap with id $item->sitemap_id not found" );
+		}
+
+		if ( $sitemap->is_indexing() ) {
+			$logger->warning( "Sitemap $sitemap is indexing, cannot add item" );
+
+			return;
+		}
+
 		$object_type = ObjectType::get_type( $object );
 		$object_id   = $object instanceof \WP_Term ? $object->term_taxonomy_id : $object->ID;
 
@@ -232,6 +244,12 @@ abstract class AbstractProvider implements ProviderInterface {
 
 		if ( ! $sitemap ) {
 			return new \WP_Error( 'sitemap_not_found', "Sitemap with id $sitemap_id not found" );
+		}
+
+		if ( $sitemap->is_indexing() ) {
+			$logger->warning( "$sitemap is indexing, cannot run jobs" );
+
+			return 0;
 		}
 
 		if ( $sitemap->is_updating() ) {
@@ -391,6 +409,12 @@ abstract class AbstractProvider implements ProviderInterface {
 		// Url updates can be processed immediately.
 		if ( $invalidations & Invalidations::ITEM_URL ) {
 			$this->update_item_url( $item );
+		}
+
+		$sitemap = $this->sitemap_store->get( $item->sitemap_id );
+
+		if ( null !== $sitemap && $sitemap->is_indexing() ) {
+			return;
 		}
 
 		if ( $invalidations & Invalidations::OBJECT_EXISTS
