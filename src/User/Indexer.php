@@ -7,6 +7,7 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\User;
 
 use AchttienVijftien\Plugin\StaticXMLSitemap\Indexer\AbstractIndexer;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Lock\WithLockTrait;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 
 /**
  * Class Indexer
@@ -30,13 +31,11 @@ class Indexer extends AbstractIndexer {
 		return array_map( fn( \WP_User $user ) => $user->ID, $this->excluded_users );
 	}
 
-	protected function get_sitemap_items(
-		int $count,
-		string $last_indexed_value = null,
-		int $last_indexed_id = null,
-		string $object_subtype = null
-	) {
+	protected function get_sitemap_items( Sitemap $sitemap, int $count ) {
 		global $wpdb;
+
+		$last_indexed_value   = $sitemap->last_indexed_value;
+		$last_indexed_id      = $sitemap->last_indexed_id;
 
 		$orderby = $this->get_orderby();
 		$fields  = array_unique( [ 'id', $orderby ] );
