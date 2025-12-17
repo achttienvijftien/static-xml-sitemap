@@ -15,6 +15,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapStore;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Store\ItemStoreInterface;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Util\DateTime;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Util\RuntimeCacheFlusher;
 
 /**
  * Class AbstractIndexer
@@ -31,6 +32,7 @@ abstract class AbstractIndexer {
 	protected bool $force_recreate = false;
 	protected int $page_size;
 	private string $orderby;
+	private RuntimeCacheFlusher $runtime_cache_flusher;
 
 	public function __construct(
 		ProviderInterface $provider,
@@ -45,6 +47,8 @@ abstract class AbstractIndexer {
 		$this->logger        = $logger;
 		$this->page_size     = $page_size;
 		$this->orderby       = $this->get_orderby();
+
+		$this->runtime_cache_flusher = new RuntimeCacheFlusher();
 	}
 
 	public function set_force_recreate( bool $force_recreate ): AbstractIndexer {
@@ -94,9 +98,7 @@ abstract class AbstractIndexer {
 		return $item_count;
 	}
 
-	abstract protected function get_sitemap_items(
-		Sitemap $sitemap, int $count
-	);
+	abstract protected function get_sitemap_items( Sitemap $sitemap, int $count );
 
 	protected function index_sitemap( int $sitemap_id ) {
 		global $wpdb;
@@ -142,6 +144,8 @@ abstract class AbstractIndexer {
 						$item_index++;
 					}
 				}
+
+				$this->runtime_cache_flusher->flush_all();
 			} while ( count( $items ) > 0 );
 		} catch ( \Exception $e ) {
 			$logger->error( $e->getMessage() );
@@ -223,4 +227,5 @@ abstract class AbstractIndexer {
 
 		return true;
 	}
+
 }
