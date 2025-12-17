@@ -12,13 +12,15 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Lock;
  */
 class Lock {
 
-	private const MAX_LOCK_AGE = 60 * 5;
-	private const MAX_TRIES    = 10;
-	private const DEFAULT_WAIT = 60;
+	private const MAX_LOCK_AGE      = 60 * 5;
+	private const DEFAULT_MAX_TRIES = 10;
+	private const DEFAULT_WAIT      = 60;
 
 	private string $name;
 	private bool $have_lock = false;
+	private ?int $lock_time = null;
 	private int $wait = self::DEFAULT_WAIT;
+	private int $max_tries = self::DEFAULT_MAX_TRIES;
 
 	/**
 	 * Lock constructor.
@@ -57,6 +59,7 @@ class Lock {
 			$wpdb->delete( $wpdb->options, $where );
 
 			$this->have_lock = false;
+			$this->lock_time = null;
 		}
 	}
 
@@ -82,31 +85,34 @@ class Lock {
 		do {
 			$now = $tries > 0 ? time() : $time_start;
 
-			$lock_time = (int) $wpdb->get_var(
+			$existing_lock_time = (int) $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT option_value FROM $wpdb->options WHERE option_name = %s",
 					$this->name
 				)
 			);
 
-			$lock_age = $lock_time ? $now - $lock_time : null;
+			$lock_age = $existing_lock_time ? $now - $existing_lock_time : null;
 
 			if ( null !== $lock_age && $lock_age > self::MAX_LOCK_AGE ) {
-				$this->release( $lock_time, true );
+				$this->release( $existing_lock_time, true );
 			}
+
+			$lock_time = time();
 
 			$lock_result = $wpdb->insert(
 				$wpdb->options,
 				[
 					'option_name'  => $this->name,
-					'option_value' => time(),
+					'option_value' => $lock_time,
 					'autoload'     => 'no',
 				],
 				[ '%s', '%d', '%s' ]
 			);
 
 			if ( false !== $lock_result ) {
-				$acquired = true;
+				$acquired        = true;
+				$this->lock_time = $lock_time;
 				break;
 			}
 
@@ -114,11 +120,15 @@ class Lock {
 				break;
 			}
 
+			if ( $this->max_tries <= 1 ) {
+				break;
+			}
+
 			sleep( $time_wait );
 
 			$time_wait *= 2;
 			$tries++;
-		} while ( ( $now - $time_start < $wait ) && $tries < self::MAX_TRIES );
+		} while ( ( $now - $time_start < $wait ) && $tries < $this->max_tries );
 
 		$wpdb->suppress_errors( $suppress_errors );
 
@@ -127,8 +137,39 @@ class Lock {
 		return $acquired;
 	}
 
+	public function refresh(): bool {
+		global $wpdb;
+
+		if ( ! $this->have_lock ) {
+			return false;
+		}
+
+		if ( time() < $this->lock_time + ( self::MAX_LOCK_AGE * 0.75 ) ) {
+			return true;
+		}
+
+		$lock_time = time();
+		$updated   = (bool) $wpdb->update(
+			$wpdb->options,
+			[ 'option_value' => $lock_time ],
+			[ 'option_name' => $this->name, 'option_value' => $this->lock_time ]
+		);
+
+		if ( $updated ) {
+			$this->lock_time = $lock_time;
+		}
+
+		return $updated;
+	}
+
 	public function set_wait( int $wait ): Lock {
 		$this->wait = $wait;
+
+		return $this;
+	}
+
+	public function set_max_tries( int $max_tries ): Lock {
+		$this->max_tries = $max_tries;
 
 		return $this;
 	}

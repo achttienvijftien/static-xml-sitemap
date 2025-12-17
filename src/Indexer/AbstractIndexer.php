@@ -73,7 +73,7 @@ abstract class AbstractIndexer {
 			}
 		}
 
-		$this->lock = Sitemap::get_lock( $sitemap );
+		$this->lock = Sitemap::get_lock( $sitemap )->set_max_tries( 1 );
 
 		add_action( 'shutdown', [ $this, 'handle_unexpected_shutdown' ] );
 
@@ -146,6 +146,10 @@ abstract class AbstractIndexer {
 				}
 
 				$this->runtime_cache_flusher->flush_all();
+
+				if ( ! $this->lock->refresh() ) {
+					throw new IndexerException( "Could not refresh lock for $sitemap" );
+				}
 			} while ( count( $items ) > 0 );
 		} catch ( \Exception $e ) {
 			$logger->error( $e->getMessage() );
@@ -156,7 +160,7 @@ abstract class AbstractIndexer {
 			$sitemap->status = Sitemap::STATUS_INDEXED;
 		}
 
-		if ( $items_inserted > 0 && ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
+		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) && ! empty( $wpdb->last_error ) ) {
 			$logger->warning(
 				"Error updating sitemap after indexing: $wpdb->last_error"
 			);

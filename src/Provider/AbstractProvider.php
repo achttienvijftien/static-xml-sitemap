@@ -106,7 +106,7 @@ abstract class AbstractProvider implements ProviderInterface {
 
 		if ( ! $force_queue_add ) {
 			$appended = $this->with_lock(
-				Sitemap::get_lock( $item->sitemap_id )->set_wait( 0 ),
+				Sitemap::get_lock( $item->sitemap_id )->set_max_tries( 1 ),
 				fn() => $this->append_to_sitemap( $item, $item->sitemap_id ),
 			);
 		}
@@ -219,7 +219,7 @@ abstract class AbstractProvider implements ProviderInterface {
 			}
 
 			$jobs_run = $this->with_lock(
-				Sitemap::get_lock( $sitemap->id )->set_wait( 0 ),
+				Sitemap::get_lock( $sitemap->id ),
 				fn() => $this->run_jobs_for_sitemap( $sitemap->id )
 			);
 
