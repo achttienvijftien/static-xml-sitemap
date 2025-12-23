@@ -15,6 +15,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapStore;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Store\ItemStoreInterface;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Util\DateTime;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Util\RuntimeCacheFlusher;
 
 /**
  * Class AbstractIndexer
@@ -30,6 +31,8 @@ abstract class AbstractIndexer {
 	protected Logger $logger;
 	protected bool $force_recreate = false;
 	protected int $page_size;
+	private string $orderby;
+	private RuntimeCacheFlusher $runtime_cache_flusher;
 
 	public function __construct(
 		ProviderInterface $provider,
@@ -43,6 +46,9 @@ abstract class AbstractIndexer {
 		$this->sitemap_store = $sitemap_store;
 		$this->logger        = $logger;
 		$this->page_size     = $page_size;
+		$this->orderby       = $this->get_orderby();
+
+		$this->runtime_cache_flusher = new RuntimeCacheFlusher();
 	}
 
 	public function set_force_recreate( bool $force_recreate ): AbstractIndexer {
@@ -67,7 +73,7 @@ abstract class AbstractIndexer {
 			}
 		}
 
-		$this->lock = Sitemap::get_lock( $sitemap );
+		$this->lock = Sitemap::get_lock( $sitemap )->set_max_tries( 1 );
 
 		add_action( 'shutdown', [ $this, 'handle_unexpected_shutdown' ] );
 
@@ -92,12 +98,7 @@ abstract class AbstractIndexer {
 		return $item_count;
 	}
 
-	abstract protected function get_sitemap_items(
-		int $count,
-		string $last_indexed_value = null,
-		int $last_indexed_id = null,
-		string $object_subtype = null
-	);
+	abstract protected function get_sitemap_items( Sitemap $sitemap, int $count );
 
 	protected function index_sitemap( int $sitemap_id ) {
 		global $wpdb;
@@ -114,9 +115,6 @@ abstract class AbstractIndexer {
 
 		$this->before_index( $sitemap_id );
 
-		$object_type    = $sitemap->object_type;
-		$object_subtype = $sitemap->object_subtype;
-
 		if ( $this->force_recreate ) {
 			$sitemap->reset();
 
@@ -126,93 +124,51 @@ abstract class AbstractIndexer {
 		$sitemap->status = Sitemap::STATUS_INDEXING;
 		$this->sitemap_store->update_sitemap( $sitemap );
 
-		$item_index           = $sitemap->last_item_index ?? 0;
-		$last_indexed_value   = $sitemap->last_indexed_value;
-		$last_indexed_id      = $sitemap->last_indexed_id;
-		$total_items_inserted = 0;
-		$error                = false;
+		$item_index     = $sitemap->last_item_index ?? 0;
+		$items_inserted = 0;
+		$error          = false;
 
-		$orderby = $this->get_orderby();
+		try {
+			do {
+				$items = $this->get_sitemap_items( $sitemap, $this->page_size );
 
-		do {
-			$items = $this->get_sitemap_items(
-				$this->page_size,
-				$last_indexed_value,
-				$last_indexed_id,
-				$object_subtype,
-			);
-
-			if ( ! is_array( $items ) ) {
-				$logger->warning( "Error getting sitemap items for {$sitemap->get_description()}: $wpdb->last_error" );
-				$error = true;
-				break;
-			}
-
-			$items_inserted = 0;
-
-			foreach ( $items as $item_data ) {
-				$object_id       = (int) $item_data->id;
-				$object_modified = $item_data->modified ?? null;
-
-				$last_indexed_value = $item_data->$orderby ?? null;
-				$last_indexed_id    = $object_id;
-
-				$item = $this->provider->get_item_for_object( $object_id );
-
-				if ( ! $item ) {
-					continue;
-				}
-
-				if ( $item->exists() ) {
-					$logger->warning( "Not updating existing item for $object_type $object_id" );
-					continue;
-				}
-
-				$item->item_index = $item_index;
-
-				if ( ! $this->item_store->insert_item( $item ) ) {
-					$logger->warning(
-						"Error inserting sitemap item for $object_type $object_id: $wpdb->last_error"
+				if ( ! is_array( $items ) ) {
+					throw new IndexerException(
+						"Error getting sitemap items for $sitemap: $wpdb->last_error"
 					);
-					$error = true;
-					break 2;
 				}
 
-				$items_inserted++;
-
-				$sitemap->last_modified      = DateTime::to_mysql( $object_modified );
-				$sitemap->last_object_id     = $object_id;
-				$sitemap->last_item_index    = $item_index;
-				$sitemap->last_indexed_value = $last_indexed_value;
-				$sitemap->last_indexed_id    = $last_indexed_id;
-				$sitemap->item_count++;
-
-				if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
-					$logger->warning(
-						"Error updating sitemap after inserting item for $object_type $object_id: $wpdb->last_error"
-					);
-					$error = true;
-					break 2;
+				foreach ( $items as $item_data ) {
+					if ( $this->add_to_sitemap( $sitemap, $item_data, $item_index ) ) {
+						$items_inserted++;
+						$item_index++;
+					}
 				}
 
-				$item_index++;
-			}
+				$this->runtime_cache_flusher->flush_all();
 
-			$total_items_inserted += $items_inserted;
-		} while ( count( $items ) > 0 );
+				if ( ! $this->lock->refresh() ) {
+					throw new IndexerException( "Could not refresh lock for $sitemap" );
+				}
+			} while ( count( $items ) > 0 );
+		} catch ( \Exception $e ) {
+			$logger->error( $e->getMessage() );
+			$error = true;
+		}
 
 		if ( ! $error ) {
 			$sitemap->status = Sitemap::STATUS_INDEXED;
-			if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
-				$logger->warning(
-					"Error updating sitemap after indexing: $wpdb->last_error"
-				);
-			}
 		}
 
-		$this->after_index( $sitemap_id, $total_items_inserted );
+		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) && ! empty( $wpdb->last_error ) ) {
+			$logger->warning(
+				"Error updating sitemap after indexing: $wpdb->last_error"
+			);
+		}
 
-		return $total_items_inserted;
+		$this->after_index( $sitemap_id, $items_inserted );
+
+		return $items_inserted;
 	}
 
 	public function handle_unexpected_shutdown(): void {
@@ -226,4 +182,54 @@ abstract class AbstractIndexer {
 	abstract protected function before_index( int $sitemap_id ): void;
 
 	abstract protected function after_index( int $sitemap_id, int $total_items_inserted ): void;
+
+	/**
+	 * @throws IndexerException
+	 */
+	protected function add_to_sitemap( Sitemap $sitemap, $item_data, int $item_index ): bool {
+		global $wpdb;
+
+		$object_id          = (int) $item_data->id;
+		$object_modified    = $item_data->modified ?? null;
+		$last_indexed_value = $item_data->{$this->orderby} ?? null;
+		$last_indexed_id    = $object_id;
+
+		$item = $this->provider->get_item_for_object( $object_id );
+
+		if ( ! $item ) {
+			return false;
+		}
+
+		if ( $item->exists() ) {
+			$this->logger->warning( "Cannot add $item to sitemap: item already exists" );
+
+			return false;
+		}
+
+		$item->item_index = $item_index;
+
+		if ( ! $this->item_store->insert_item( $item ) ) {
+			throw new IndexerException(
+				"Error inserting sitemap item $item: $wpdb->last_error",
+				IndexerException::ITEM_INSERT_ERROR
+			);
+		}
+
+		$sitemap->last_modified      = DateTime::to_mysql( $object_modified );
+		$sitemap->last_object_id     = $object_id;
+		$sitemap->last_item_index    = $item_index;
+		$sitemap->last_indexed_value = $last_indexed_value;
+		$sitemap->last_indexed_id    = $last_indexed_id;
+		$sitemap->item_count++;
+
+		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
+			throw new IndexerException(
+				"Error updating sitemap after inserting item $item: $wpdb->last_error",
+				IndexerException::SITEMAP_UPDATE_ERROR
+			);
+		}
+
+		return true;
+	}
+
 }

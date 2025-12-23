@@ -53,6 +53,10 @@ class SitemapProvider extends AbstractProvider implements ProviderInterface {
 		}
 
 		foreach ( $items as $item ) {
+			if ( null !== $sitemap && $sitemap->is_indexing() ) {
+				continue;
+			}
+
 			if ( null === $sitemap || $item->sitemap_id !== $sitemap->id ) {
 				$this->job_store->insert_job( Job::remove_item( $item ) );
 				continue;

@@ -83,6 +83,18 @@ abstract class AbstractProvider implements ProviderInterface {
 			return;
 		}
 
+		$sitemap = $this->sitemap_store->get( $item->sitemap_id );
+
+		if ( null === $sitemap ) {
+			$logger->warning( "Sitemap with id $item->sitemap_id not found" );
+		}
+
+		if ( $sitemap->is_indexing() ) {
+			$logger->warning( "Sitemap $sitemap is indexing, cannot add item" );
+
+			return;
+		}
+
 		$object_type = ObjectType::get_type( $object );
 		$object_id   = $object instanceof \WP_Term ? $object->term_taxonomy_id : $object->ID;
 
@@ -94,7 +106,7 @@ abstract class AbstractProvider implements ProviderInterface {
 
 		if ( ! $force_queue_add ) {
 			$appended = $this->with_lock(
-				Sitemap::get_lock( $item->sitemap_id )->set_wait( 0 ),
+				Sitemap::get_lock( $item->sitemap_id )->set_max_tries( 1 ),
 				fn() => $this->append_to_sitemap( $item, $item->sitemap_id ),
 			);
 		}
@@ -207,7 +219,7 @@ abstract class AbstractProvider implements ProviderInterface {
 			}
 
 			$jobs_run = $this->with_lock(
-				Sitemap::get_lock( $sitemap->id )->set_wait( 0 ),
+				Sitemap::get_lock( $sitemap->id ),
 				fn() => $this->run_jobs_for_sitemap( $sitemap->id )
 			);
 
@@ -232,6 +244,12 @@ abstract class AbstractProvider implements ProviderInterface {
 
 		if ( ! $sitemap ) {
 			return new \WP_Error( 'sitemap_not_found', "Sitemap with id $sitemap_id not found" );
+		}
+
+		if ( $sitemap->is_indexing() ) {
+			$logger->warning( "$sitemap is indexing, cannot run jobs" );
+
+			return 0;
 		}
 
 		if ( $sitemap->is_updating() ) {
@@ -391,6 +409,12 @@ abstract class AbstractProvider implements ProviderInterface {
 		// Url updates can be processed immediately.
 		if ( $invalidations & Invalidations::ITEM_URL ) {
 			$this->update_item_url( $item );
+		}
+
+		$sitemap = $this->sitemap_store->get( $item->sitemap_id );
+
+		if ( null !== $sitemap && $sitemap->is_indexing() ) {
+			return;
 		}
 
 		if ( $invalidations & Invalidations::OBJECT_EXISTS

@@ -7,6 +7,7 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Post;
 
 use AchttienVijftien\Plugin\StaticXMLSitemap\Indexer\AbstractIndexer;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Lock\WithLockTrait;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 
 /**
  * Class Indexer
@@ -36,24 +37,22 @@ class Indexer extends AbstractIndexer {
 		return $this->excluded_post_ids[ $object_subtype ];
 	}
 
-	protected function get_sitemap_items(
-		int $count,
-		string $last_indexed_value = null,
-		int $last_indexed_id = null,
-		string $object_subtype = null
-	) {
+	protected function get_sitemap_items( Sitemap $sitemap, int $count ) {
 		global $wpdb;
 
 		$logger = $this->logger->for_source( __METHOD__ );
 
-		if ( null === $object_subtype ) {
+		$last_indexed_value   = $sitemap->last_indexed_value;
+		$last_indexed_id      = $sitemap->last_indexed_id;
+
+		if ( null === $sitemap->object_subtype ) {
 			return [];
 		}
 
-		$post_statuses = $this->get_post_statuses( $object_subtype );
+		$post_statuses = $this->get_post_statuses( $sitemap->object_subtype );
 
 		if ( empty( $post_statuses ) ) {
-			$logger->warning( "No post statuses indexable for post type $object_subtype" );
+			$logger->warning( "No post statuses indexable for post type $sitemap->object_subtype" );
 
 			return [];
 		}
@@ -61,14 +60,14 @@ class Indexer extends AbstractIndexer {
 		$orderby = $this->get_orderby();
 		$fields  = array_unique( [ 'id', $orderby ] );
 
-		$query = ( new Query( $object_subtype ) )
+		$query = ( new Query( $sitemap->object_subtype ) )
 			->set_fields( $fields )
 			->set_indexable( true )
 			->set_post_status( $post_statuses )
 			->set_orderby( $orderby )
 			->set_limit( $count );
 
-		$excluded_post_ids = $this->get_excluded_post_ids( $object_subtype );
+		$excluded_post_ids = $this->get_excluded_post_ids( $sitemap->object_subtype );
 
 		if ( $excluded_post_ids ) {
 			$query->set_exclude( $excluded_post_ids );

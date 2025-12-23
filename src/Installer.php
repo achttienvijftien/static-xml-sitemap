@@ -83,7 +83,7 @@ class Installer {
 			return;
 		}
 
-		$lock = ( new Lock( 'upgrade_db' ) )->set_wait( 0 );
+		$lock = ( new Lock( 'upgrade_db' ) )->set_max_tries( 1 );
 
 		if ( ! $lock->acquire() ) {
 			return;

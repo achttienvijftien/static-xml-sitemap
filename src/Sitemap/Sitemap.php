@@ -76,7 +76,11 @@ class Sitemap implements EntityInterface {
 	}
 
 	public function is_updating(): bool {
-		return $this->status !== self::STATUS_INDEXED;
+		return $this->status === self::STATUS_UPDATING;
+	}
+
+	public function is_indexing(): bool {
+		return $this->status === self::STATUS_INDEXING;
 	}
 
 	public function __toString() {

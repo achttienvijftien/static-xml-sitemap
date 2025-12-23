@@ -9,6 +9,7 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Term;
 
 use AchttienVijftien\Plugin\StaticXMLSitemap\Indexer\AbstractIndexer;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Lock\WithLockTrait;
+use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\Sitemap;
 
 /**
  * Class Indexer
@@ -28,21 +29,21 @@ class Indexer extends AbstractIndexer {
 	}
 
 	protected function get_sitemap_items(
-		int $count,
-		string $last_indexed_value = null,
-		int $last_indexed_id = null,
-		string $object_subtype = null
+		Sitemap $sitemap, int $count
 	) {
 		global $wpdb;
 
-		if ( null === $object_subtype ) {
+		$last_indexed_value   = $sitemap->last_indexed_value;
+		$last_indexed_id      = $sitemap->last_indexed_id;
+
+		if ( null === $sitemap->object_subtype ) {
 			return [];
 		}
 
 		$orderby = $this->get_orderby();
 		$fields  = array_unique( [ 'id', $orderby ] );
 
-		$query = ( new Query( $object_subtype ) )
+		$query = ( new Query( $sitemap->object_subtype ) )
 			->set_fields( $fields )
 			->set_indexable( true )
 			->set_orderby( $orderby )
