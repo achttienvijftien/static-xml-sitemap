@@ -3,7 +3,7 @@
  * Plugin Name: Static XML sitemap
  * Plugin URI: https://www.1815.nl
  * Description: Generate static XML sitemaps for large WordPress sites
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: 1815
  * Author URI: https://www.1815.nl
  *

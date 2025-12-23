@@ -7,13 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0] 2025-12-04
+## [1.1.0] - 2025-12-23
 
-Initial release
+### Fixed
 
-[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.0.0...main
+- Increase lock timeout to 5 minutes
+- Make is_updating() behave as expected and add checks for indexing status
 
-[1.0.0] https://github.com/achttienvijftien/static-xml-sitemap/compare/fa9730d...1.0.0
+### Added
+
+- Add runtime cache flushing to decrease memory pressure
+
+### Changed
+
+- Clean up lock config
+- Extract indexer inner loop to a new method
+- Tweak lock max tries and refresh lock in indexer
+
+## [1.0.0] - 2025-12-04
+
+- Initial release
+
+[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.0...main
+
+[1.1.0]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.0.0...1.1.0
+
+[1.0.0]: https://github.com/achttienvijftien/static-xml-sitemap/compare/fa9730d...1.0.0
 
 
 

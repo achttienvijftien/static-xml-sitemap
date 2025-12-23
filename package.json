@@ -1,6 +1,6 @@
 {
   "name": "@achttienvijftien/static-xml-sitemap",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Static XML sitemap",
   "main": "build/index.js",
   "repository": "todo",
