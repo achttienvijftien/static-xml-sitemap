@@ -37,10 +37,10 @@ class WordPressSeo {
 	private TermWatcher $term_watcher;
 	private TermItemStore $term_item_store;
 
-	private ?array $accessible_post_types = null;
+	private ?array $accessible_post_types   = null;
 	private ?array $indexable_post_statuses = null;
-	private ?array $excluded_post_ids = null;
-	private ?array $excluded_term_ids = null;
+	private ?array $excluded_post_ids       = null;
+	private ?array $excluded_term_ids       = null;
 	private TermCache $term_cache;
 
 	public function __construct(
@@ -430,7 +430,7 @@ class WordPressSeo {
 
 		$clauses['where'][] = '(wpseo_um_profile_updated.meta_value IS NOT NULL)';
 		$clauses['where'][] = "(wpseo_um_lvl.meta_value != '0')";
-		$clauses['where'][] = "(wpseo_um_noindex.meta_value IS NULL " .
+		$clauses['where'][] = '(wpseo_um_noindex.meta_value IS NULL ' .
 			"OR wpseo_um_noindex.meta_value != 'on')";
 
 		$user_level_meta_key = $wpdb->get_blog_prefix() . 'user_level';
@@ -454,19 +454,19 @@ class WordPressSeo {
 			$author_archive_post_types = esc_sql( $author_archive_post_types );
 
 			$clauses['where'][] = '(u.ID IN (' .
-				'SELECT DISTINCT wp_posts.post_author ' .
-				'FROM wp_posts ' .
-				"WHERE wp_posts.post_status = 'publish' " .
-				"AND wp_posts.post_type IN ('"
-				. implode( "','", $author_archive_post_types )
-				. "')" .
-				"))";
+									'SELECT DISTINCT posts_published.post_author ' .
+									'FROM ' . $wpdb->posts . ' posts_published ' .
+									"WHERE posts_published.post_status = 'publish' " .
+									"AND posts_published.post_type IN ('"
+									. implode( "','", $author_archive_post_types )
+									. "')" .
+									'))';
 		} else {
 			$cap_meta_key = $wpdb->get_blog_prefix() . 'capabilities';
 
 			$clauses['join'][] = $wpdb->prepare(
 				"LEFT JOIN $wpdb->usermeta AS wpseo_um_cap" .
-				" ON wpseo_um_cap.user_id = u.ID AND wpseo_um_cap.meta_key = %s",
+				' ON wpseo_um_cap.user_id = u.ID AND wpseo_um_cap.meta_key = %s',
 				$cap_meta_key
 			);
 
@@ -901,10 +901,10 @@ class WordPressSeo {
 		$last_modified = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT p.ID, p.post_modified_gmt ' .
-				'FROM wp_posts AS p ' .
-				'    INNER JOIN wp_term_relationships AS term_rel ' .
+				'FROM ' . $wpdb->posts . ' AS p ' .
+				'    INNER JOIN ' . $wpdb->term_relationships . ' AS term_rel ' .
 				'ON term_rel.object_id = p.ID ' .
-				'    INNER JOIN wp_term_taxonomy AS term_tax ' .
+				'    INNER JOIN ' . $wpdb->term_taxonomy . ' AS term_tax ' .
 				'    ON term_tax.term_taxonomy_id = term_rel.term_taxonomy_id ' .
 				'    AND term_tax.term_taxonomy_id = %d ' .
 				'WHERE p.post_status IN (\'' . implode( "', '", $post_statuses ) . '\') ' .
@@ -983,5 +983,4 @@ class WordPressSeo {
 
 		return $this->indexable_post_statuses[ $post_type ];
 	}
-
 }
