@@ -72,6 +72,10 @@ class Paginator {
 	}
 
 	private function get_slug(): string {
+		if ( 'user' === $this->sitemap->object_type ) {
+			return 'author';
+		}
+
 		return $this->sitemap->object_subtype ?? $this->sitemap->object_type;
 	}
 
