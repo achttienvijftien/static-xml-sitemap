@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-01-20
+
 ### Fixed
 
 - Add multisite support to (parts of) queries in WordPress SEO compatibility class
@@ -33,7 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.0...main
+[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.1...main
+
+[1.1.1]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.0...1.1.1
 
 [1.1.0]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.0.0...1.1.0
 
