@@ -954,8 +954,33 @@ class WordPressSeo {
 			remove_action( 'template_redirect', [ $router, 'template_redirect' ], 0 );
 		}
 
+		// Disable WPSEO_Sitemaps_Admin for performance.
+		if ( class_exists( 'WPSEO_Sitemaps_Admin' ) ) {
+			$this->disable_wpseo_sitemaps_admin();
+		}
+
 		// Note: the sitemap cache used to be unhooked here as well, but we keep that in place
 		// for now to let the News sitemap (and its cache) to function as-is.
+	}
+
+	private function disable_wpseo_sitemaps_admin(): void {
+		global $wp_filter;
+
+		if ( empty( $wp_filter['transition_post_status'][10] ) ) {
+			return;
+		}
+
+		foreach ( $wp_filter['transition_post_status'][10] as $callback ) {
+			$instance = $callback['function'][0] ?? null;
+
+			if ( ! $instance instanceof \WPSEO_Sitemaps_Admin ) {
+				continue;
+			}
+
+			remove_action( 'transition_post_status', $callback['function'] );
+			remove_action( 'admin_footer', [ $instance, 'status_transition_bulk_finished' ] );
+			break;
+		}
 	}
 
 	public function is_post_status_indexable( string $post_status, string $post_type ): bool {
