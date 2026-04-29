@@ -40,7 +40,7 @@ class UserItem implements SitemapItemInterface {
 	}
 
 	public function get_object() {
-		return get_user_by( 'id', $this->user_id );
+		return get_user_by( 'id', $this->user_id ) ?: null;
 	}
 
 	public function get_object_id(): ?int {
