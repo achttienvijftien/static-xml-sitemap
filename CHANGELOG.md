@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - WP-2681 - Prevent warning and TypeError when a sitemap item references a missing user
+- Disable `WPSEO_Sitemaps_Admin` hooks when replacing Yoast sitemaps. Its `transition_post_status` handler invalidates the WordPress `lastpostmodified` object cache on every post publish, causing expensive `ORDER BY post_modified_gmt DESC` full table scans on high-volume sites.
 
 ## [1.1.1] - 2026-01-20
 
