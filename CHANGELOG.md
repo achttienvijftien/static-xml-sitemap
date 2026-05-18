@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-18
+
 ### Fixed
 
 - WP-2681 - Prevent warning and TypeError when a sitemap item references a missing user
@@ -40,7 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.1...main
+[unreleased]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.2.0...main
+
+[1.2.0]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.1...1.2.0
 
 [1.1.1]: https://github.com/achttienvijftien/static-xml-sitemap/compare/1.1.0...1.1.1
 
