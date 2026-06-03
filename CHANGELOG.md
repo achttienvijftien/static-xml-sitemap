@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- WP-2724 - Cast `WP_Post::$post_author` to int in `User\Watcher` to prevent TypeError on `post_updated` and `save_post`.
+
 ## [1.2.0] - 2026-05-18
 
 ### Fixed

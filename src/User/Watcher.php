@@ -54,7 +54,9 @@ class Watcher extends AbstractWatcher {
 		$post_status_changed = $post_before->post_status !== $post_after->post_status;
 
 		foreach ( [ $post_before, $post_after ] as $post ) {
-			if ( 0 === $post->post_author ) {
+			$post_author = (int) $post->post_author;
+
+			if ( 0 === $post_author ) {
 				continue;
 			}
 
@@ -63,10 +65,10 @@ class Watcher extends AbstractWatcher {
 			}
 
 			if ( $post_author_changed ) {
-				$this->add_events( $post->post_author, self::POST_AUTHOR_UPDATED );
+				$this->add_events( $post_author, self::POST_AUTHOR_UPDATED );
 			}
 			if ( $post_status_changed ) {
-				$this->add_events( $post->post_author, self::POST_STATUS_UPDATED );
+				$this->add_events( $post_author, self::POST_STATUS_UPDATED );
 			}
 		}
 	}
@@ -77,12 +79,14 @@ class Watcher extends AbstractWatcher {
 	 * @param bool      $update
 	 */
 	public function save_post( $post_id, \WP_Post $post, bool $update ): void {
-		if ( $update || 0 === $post->post_author || ! $this->has_public_post_type( $post ) ) {
+		$post_author = (int) $post->post_author;
+
+		if ( $update || 0 === $post_author || ! $this->has_public_post_type( $post ) ) {
 			return;
 		}
 
-		$this->add_events( $post->post_author, self::POST_AUTHOR_UPDATED );
-		$this->add_events( $post->post_author, self::POST_STATUS_UPDATED );
+		$this->add_events( $post_author, self::POST_AUTHOR_UPDATED );
+		$this->add_events( $post_author, self::POST_STATUS_UPDATED );
 	}
 
 	private function has_public_post_type( \WP_Post $post ): bool {
