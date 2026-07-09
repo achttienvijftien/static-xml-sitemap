@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Runs phpunit inside the (hot) wordpress compose container.
+#
+# Environment variables:
+#   PHPUNIT_PULL=0        skip pulling images when starting the compose stack
+#   PHPUNIT_TTY=0|1       force-disable or force-enable a TTY (default: auto-detect)
+#   WP_TESTS_DB_NAME=...  run against an isolated database (created on the fly)
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+if [[ -z "$(docker compose ps --status running --quiet wordpress)" ]]; then
+    pull_policy=always
+    [[ "${PHPUNIT_PULL:-1}" == "0" ]] && pull_policy=missing
+    docker compose up --detach --wait --pull "$pull_policy"
+fi
+
+exec_args=(exec)
+
+tty="${PHPUNIT_TTY:-}"
+if [[ "$tty" == "0" ]] || { [[ -z "$tty" ]] && ! [[ -t 0 && -t 1 ]]; }; then
+    exec_args+=(--no-TTY)
+fi
+
+db_name="${WP_TESTS_DB_NAME:-wordpress}"
+if [[ "$db_name" != "wordpress" ]]; then
+    docker compose exec --no-TTY db mysql -uroot -pwordpress -e \
+        "CREATE DATABASE IF NOT EXISTS \`$db_name\`; GRANT ALL ON \`$db_name\`.* TO 'wordpress'@'%';" \
+        2> >(grep -v "Using a password" >&2 || true)
+    exec_args+=(--env "WP_TESTS_DB_NAME=$db_name")
+fi
+
+exec docker compose "${exec_args[@]}" \
+    --workdir /var/www/html/wp-content/plugins/static-xml-sitemap \
+    wordpress php vendor/bin/phpunit "$@"
