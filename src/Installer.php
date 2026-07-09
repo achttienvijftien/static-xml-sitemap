@@ -243,5 +243,4 @@ SQL;
 		delete_option( 'static_sitemap_install_errors' );
 		delete_option( 'static_sitemap_missing_tables' );
 	}
-
 }

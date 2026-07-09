@@ -15,11 +15,11 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Provider\ProviderInterface;
 abstract class AbstractWatcher implements WatcherInterface {
 
 	protected ?ProviderInterface $provider = null;
-	protected array $events = [];
+	protected array $events                = [];
 
 	public function add_events( int $object_id, int $events ): void {
 		$this->events[ $object_id ] ??= 0;
-		$this->events[ $object_id ] |= $events;
+		$this->events[ $object_id ]  |= $events;
 	}
 
 	public function process_events(): void {
@@ -39,5 +39,4 @@ abstract class AbstractWatcher implements WatcherInterface {
 	public function set_provider( ProviderInterface $provider ): void {
 		$this->provider = $provider;
 	}
-
 }

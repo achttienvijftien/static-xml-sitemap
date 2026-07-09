@@ -61,7 +61,7 @@ class JobStore {
 		$num_rows = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO $this->table ($fields) VALUES ($formats)"
-				. " ON DUPLICATE KEY UPDATE id = id",
+				. ' ON DUPLICATE KEY UPDATE id = id',
 				array_merge( $field_names, $values )
 			)
 		);
@@ -192,5 +192,4 @@ class JobStore {
 
 		return $this->delete_where_id_in( array_map( fn( $job ) => $job->id, $jobs ) );
 	}
-
 }

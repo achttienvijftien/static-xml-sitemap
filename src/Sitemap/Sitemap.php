@@ -72,7 +72,7 @@ class Sitemap implements EntityInterface {
 		$this->last_object_id  = $object->get_object_id();
 		$this->last_item_index = $object->get_item_index();
 
-		$this->item_count++;
+		++$this->item_count;
 	}
 
 	public function is_updating(): bool {
@@ -94,7 +94,7 @@ class Sitemap implements EntityInterface {
 			case 'post':
 				return "post type $this->object_subtype";
 			case 'user':
-				return "authors";
+				return 'authors';
 			case 'term':
 				return "taxonomy $this->object_subtype";
 			default:
@@ -103,10 +103,12 @@ class Sitemap implements EntityInterface {
 	}
 
 	public static function for_object_type( string $object_type, ?string $object_subtype = null ): ?self {
-		$sitemap = new self( [
-			'object_type'    => $object_type,
-			'object_subtype' => $object_subtype,
-		] );
+		$sitemap = new self(
+			[
+				'object_type'    => $object_type,
+				'object_subtype' => $object_subtype,
+			]
+		);
 
 		return $sitemap->initialize();
 	}
@@ -118,7 +120,7 @@ class Sitemap implements EntityInterface {
 		$this->last_item_index    = null;
 		$this->last_indexed_id    = null;
 		$this->last_indexed_value = null;
-		$this->status             = Sitemap::STATUS_UNINDEXED;
+		$this->status             = self::STATUS_UNINDEXED;
 
 		return $this;
 	}
@@ -126,5 +128,4 @@ class Sitemap implements EntityInterface {
 	public function reset(): void {
 		$this->initialize();
 	}
-
 }

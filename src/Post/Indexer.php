@@ -19,7 +19,7 @@ class Indexer extends AbstractIndexer {
 	use WithLockTrait;
 
 	private array $excluded_post_ids = [];
-	private array $post_statuses = [];
+	private array $post_statuses     = [];
 
 	public function get_post_statuses( string $object_subtype ): array {
 		if ( ! isset( $this->post_statuses[ $object_subtype ] ) ) {
@@ -44,8 +44,8 @@ class Indexer extends AbstractIndexer {
 
 		$logger = $this->logger->for_source( __METHOD__ );
 
-		$last_indexed_value   = $sitemap->last_indexed_value;
-		$last_indexed_id      = $sitemap->last_indexed_id;
+		$last_indexed_value = $sitemap->last_indexed_value;
+		$last_indexed_id    = $sitemap->last_indexed_id;
 
 		if ( null === $sitemap->object_subtype ) {
 			return [];

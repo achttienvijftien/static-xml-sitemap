@@ -174,5 +174,4 @@ class SitemapProvider extends AbstractProvider implements ProviderInterface {
 			return 0;
 		}
 	}
-
 }

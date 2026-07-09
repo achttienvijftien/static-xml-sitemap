@@ -61,5 +61,4 @@ class UserWatcher {
 	public function update_user_role( int $user_id ): void {
 		$this->watcher->add_events( $user_id, self::USER_ROLES_UPDATED );
 	}
-
 }

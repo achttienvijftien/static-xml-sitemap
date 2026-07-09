@@ -21,5 +21,4 @@ class ArrayAccessor {
 	public function __get( $name ) {
 		return $this->array[ $name ] ?? null;
 	}
-
 }

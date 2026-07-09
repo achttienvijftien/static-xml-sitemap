@@ -97,5 +97,4 @@ class Job implements EntityInterface {
 			]
 		);
 	}
-
 }

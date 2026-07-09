@@ -21,7 +21,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Util\Url;
  */
 class TermItem implements SitemapItemInterface {
 
-	use SitemapItemTrait, EntityTrait;
+	use SitemapItemTrait;
+	use EntityTrait;
 
 	public ?int $term_taxonomy_id;
 	public ?string $last_modified;

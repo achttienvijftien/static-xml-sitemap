@@ -112,5 +112,4 @@ class Watcher extends AbstractWatcher {
 	public function user_register( $user_id ): void {
 		$this->add_events( $user_id, self::USER_REGISTERED );
 	}
-
 }

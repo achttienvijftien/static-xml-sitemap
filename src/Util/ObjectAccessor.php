@@ -21,5 +21,4 @@ class ObjectAccessor {
 	public function __get( $name ) {
 		return $this->object->$name ?? null;
 	}
-
 }

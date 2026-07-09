@@ -39,5 +39,4 @@ class ObjectType {
 
 		return null;
 	}
-
 }

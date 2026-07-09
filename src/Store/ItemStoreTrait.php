@@ -67,7 +67,7 @@ trait ItemStoreTrait {
 			return [];
 		}
 
-		return array_map( fn( $item ) => new  $this->class ( $item ), $items );
+		return array_map( fn( $item ) => new $this->class( $item ), $items );
 	}
 
 	/**
@@ -299,5 +299,4 @@ trait ItemStoreTrait {
 
 		return $sitemap;
 	}
-
 }

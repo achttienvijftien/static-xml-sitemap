@@ -77,5 +77,4 @@ class PostWatcher {
 
 		$this->watcher->add_events( $post_id, self::POST_MODIFIED_UPDATED );
 	}
-
 }

@@ -15,7 +15,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Entity\EntityInterface;
 class EntityCache {
 
 	protected array $entities = [];
-	protected array $tags = [];
+	protected array $tags     = [];
 	/**
 	 * @var callable
 	 */

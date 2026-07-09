@@ -14,14 +14,14 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap\SitemapItemInterface;
  */
 abstract class AbstractObjectQuery implements ObjectQueryInterface {
 
-	public ?array $after = null;
-	public ?array $fields = null;
-	public ?int $limit = null;
-	public ?array $exclude = null;
-	public ?bool $indexable = null;
-	public ?string $orderby = null;
-	public string $order = 'ASC';
-	public ?int $sitemap = null;
+	public ?array $after      = null;
+	public ?array $fields     = null;
+	public ?int $limit        = null;
+	public ?array $exclude    = null;
+	public ?bool $indexable   = null;
+	public ?string $orderby   = null;
+	public string $order      = 'ASC';
+	public ?int $sitemap      = null;
 	public ?array $item_index = null;
 
 	abstract protected function get_clauses(): array;
@@ -104,7 +104,7 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 	public function get_query(): string {
 		$clauses = $this->get_query_clauses();
 
-		$query = "SELECT {$clauses['select']}\n";
+		$query  = "SELECT {$clauses['select']}\n";
 		$query .= "FROM {$clauses['from']}\n";
 
 		if ( ! empty( $clauses['join'] ) ) {

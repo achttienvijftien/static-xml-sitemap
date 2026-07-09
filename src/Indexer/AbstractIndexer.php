@@ -140,8 +140,8 @@ abstract class AbstractIndexer {
 
 				foreach ( $items as $item_data ) {
 					if ( $this->add_to_sitemap( $sitemap, $item_data, $item_index ) ) {
-						$items_inserted++;
-						$item_index++;
+						++$items_inserted;
+						++$item_index;
 					}
 				}
 
@@ -220,7 +220,7 @@ abstract class AbstractIndexer {
 		$sitemap->last_modified   = DateTime::to_mysql( $object_modified );
 		$sitemap->last_object_id  = $object_id;
 		$sitemap->last_item_index = $item_index;
-		$sitemap->item_count++;
+		++$sitemap->item_count;
 
 		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
 			throw new IndexerException(
@@ -231,5 +231,4 @@ abstract class AbstractIndexer {
 
 		return true;
 	}
-
 }

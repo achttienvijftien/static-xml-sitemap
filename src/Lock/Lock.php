@@ -19,8 +19,8 @@ class Lock {
 	private string $name;
 	private bool $have_lock = false;
 	private ?int $lock_time = null;
-	private int $wait = self::DEFAULT_WAIT;
-	private int $max_tries = self::DEFAULT_MAX_TRIES;
+	private int $wait       = self::DEFAULT_WAIT;
+	private int $max_tries  = self::DEFAULT_MAX_TRIES;
 
 	/**
 	 * Lock constructor.
@@ -127,7 +127,7 @@ class Lock {
 			sleep( $time_wait );
 
 			$time_wait *= 2;
-			$tries++;
+			++$tries;
 		} while ( ( $now - $time_start < $wait ) && $tries < $this->max_tries );
 
 		$wpdb->suppress_errors( $suppress_errors );
@@ -152,7 +152,10 @@ class Lock {
 		$updated   = (bool) $wpdb->update(
 			$wpdb->options,
 			[ 'option_value' => $lock_time ],
-			[ 'option_name' => $this->name, 'option_value' => $this->lock_time ]
+			[
+				'option_name'  => $this->name,
+				'option_value' => $this->lock_time,
+			]
 		);
 
 		if ( $updated ) {

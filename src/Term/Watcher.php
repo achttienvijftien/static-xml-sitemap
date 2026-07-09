@@ -80,5 +80,4 @@ class Watcher extends AbstractWatcher {
 
 		$this->add_events( $term, self::TERM_COUNT_UPDATED );
 	}
-
 }

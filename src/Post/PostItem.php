@@ -21,7 +21,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Util\Url;
  */
 class PostItem implements SitemapItemInterface {
 
-	use SitemapItemTrait, EntityTrait;
+	use SitemapItemTrait;
+	use EntityTrait;
 
 	public ?int $post_id;
 

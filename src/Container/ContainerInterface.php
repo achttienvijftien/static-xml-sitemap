@@ -17,5 +17,4 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface {
 	public function get_parameter( string $name );
 
 	public function has_parameter( string $name ): bool;
-
 }

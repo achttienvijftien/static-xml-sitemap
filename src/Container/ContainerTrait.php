@@ -9,8 +9,8 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Container;
 
 trait ContainerTrait {
 
-	protected array $services = [];
-	protected array $factories = [];
+	protected array $services   = [];
+	protected array $factories  = [];
 	protected array $parameters = [];
 
 	/**

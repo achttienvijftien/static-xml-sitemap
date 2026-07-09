@@ -99,5 +99,4 @@ class SitemapIndexRenderer {
 				return null;
 		}
 	}
-
 }

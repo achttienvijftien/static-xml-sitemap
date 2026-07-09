@@ -31,5 +31,4 @@ class PropertyAccessor {
 	public static function get_public_object_vars( object $object ): array {
 		return get_object_vars( $object );
 	}
-
 }

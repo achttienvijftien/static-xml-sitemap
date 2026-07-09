@@ -28,5 +28,4 @@ trait EntityTrait {
 	public function exists(): bool {
 		return null !== $this->id;
 	}
-
 }

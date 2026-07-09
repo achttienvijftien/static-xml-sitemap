@@ -16,5 +16,4 @@ interface EntityInterface {
 	public function to_array(): array;
 
 	public function exists(): bool;
-
 }

@@ -51,12 +51,13 @@ class Bootstrap {
 	}
 
 	private static function add_admin_notice( \WP_Error $error ): void {
-		add_action( 'admin_notices', function () use ( $error ) {
-			echo '<div class="notice notice-error is-dismissible"><p>'
+		add_action(
+			'admin_notices',
+			function () use ( $error ) {
+				echo '<div class="notice notice-error is-dismissible"><p>'
 				. $error->get_error_message()
 				. '</p></div>';
-		} );
+			}
+		);
 	}
-
-
 }

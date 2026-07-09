@@ -12,7 +12,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Entity\EntityInterface;
 trait StoreTrait {
 
 	protected string $table;
-	protected array $field_types = [];
+	protected array $field_types  = [];
 	protected ?EntityCache $cache = null;
 
 	/**
@@ -141,5 +141,4 @@ trait StoreTrait {
 	public function get_table(): string {
 		return $this->table;
 	}
-
 }

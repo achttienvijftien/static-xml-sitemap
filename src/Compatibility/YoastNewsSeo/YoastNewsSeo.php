@@ -115,5 +115,4 @@ class YoastNewsSeo {
 		$wpseo_sitemaps->xsl_output( $yoast_sitemap_xsl );
 		exit();
 	}
-
 }

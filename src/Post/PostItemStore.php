@@ -21,7 +21,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Store\StoreTrait;
  */
 class PostItemStore implements ItemStoreInterface {
 
-	use StoreTrait, ItemStoreTrait;
+	use StoreTrait;
+	use ItemStoreTrait;
 
 	public function __construct( int $page_size ) {
 		global $wpdb;

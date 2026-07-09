@@ -311,5 +311,4 @@ class Container implements ContainerInterface {
 			$this->get( PostItemStore::class ),
 		);
 	}
-
 }

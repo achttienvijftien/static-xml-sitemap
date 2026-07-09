@@ -19,7 +19,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Util\Url;
  */
 class UserItem implements SitemapItemInterface {
 
-	use SitemapItemTrait, EntityTrait;
+	use SitemapItemTrait;
+	use EntityTrait;
 
 	public ?int $user_id;
 

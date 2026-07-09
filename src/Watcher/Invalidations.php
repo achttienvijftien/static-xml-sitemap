@@ -14,5 +14,4 @@ interface Invalidations {
 	public const ITEM_URL           = 1 << 2;
 	public const OBJECT_EXISTS      = 1 << 3;
 	public const ITEM_LAST_MODIFIED = 1 << 4;
-
 }

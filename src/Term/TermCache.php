@@ -130,5 +130,4 @@ class TermCache {
 
 		return $terms[ $term->parent ];
 	}
-
 }

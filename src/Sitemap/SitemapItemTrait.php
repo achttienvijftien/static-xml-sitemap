@@ -42,5 +42,4 @@ trait SitemapItemTrait {
 	public function get_sitemap_id(): ?int {
 		return $this->sitemap_id;
 	}
-
 }

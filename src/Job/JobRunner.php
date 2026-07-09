@@ -21,8 +21,8 @@ class JobRunner {
 	private Sitemap $sitemap;
 	private Logger $logger;
 
-	private array $jobs = [];
-	private bool $running = false;
+	private array $jobs       = [];
+	private bool $running     = false;
 	private ?string $claim_id = null;
 
 	public function __construct( JobStore $job_store, ItemStoreInterface $item_store, Sitemap $sitemap, Logger $logger ) {
@@ -152,5 +152,4 @@ class JobRunner {
 		}
 		$this->running = false;
 	}
-
 }

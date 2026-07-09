@@ -84,5 +84,4 @@ class Plugin {
 	public function uninstall(): void {
 		$this->installer->uninstall();
 	}
-
 }

@@ -27,5 +27,4 @@ trait DateFormatterTrait {
 
 		return $datetime->format( \DATE_W3C );
 	}
-
 }

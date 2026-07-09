@@ -144,5 +144,4 @@ class Router {
 
 		update_option( self::OPTION_FLUSHED_REWRITE_RULES, true, true );
 	}
-
 }

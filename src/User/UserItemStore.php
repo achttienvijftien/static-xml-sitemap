@@ -19,7 +19,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Store\StoreTrait;
  */
 class UserItemStore implements ItemStoreInterface {
 
-	use StoreTrait, ItemStoreTrait;
+	use StoreTrait;
+	use ItemStoreTrait;
 
 	public function __construct( int $page_size ) {
 		global $wpdb;
@@ -133,5 +134,4 @@ class UserItemStore implements ItemStoreInterface {
 
 		return new Paginator( $sitemap, $this, $this->page_size, $order );
 	}
-
 }

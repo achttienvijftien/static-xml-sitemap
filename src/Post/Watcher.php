@@ -83,5 +83,4 @@ class Watcher extends AbstractWatcher {
 	public function delete_post( $post_id, \WP_Post $post ): void {
 		$this->add_events( $post_id, self::POST_DELETED );
 	}
-
 }

@@ -35,5 +35,4 @@ class UserIndexer {
 			update_user_meta( $user->ID, '_yoast_wpseo_profile_updated', $time );
 		}
 	}
-
 }

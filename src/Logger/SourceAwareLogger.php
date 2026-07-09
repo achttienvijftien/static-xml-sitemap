@@ -125,5 +125,4 @@ class SourceAwareLogger {
 	public function debug( $message, array $context = [] ) {
 		$this->logger->log( LogLevel::DEBUG, "$this->source: $message", $context );
 	}
-
 }

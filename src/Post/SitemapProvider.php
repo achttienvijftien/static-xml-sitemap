@@ -206,5 +206,4 @@ class SitemapProvider extends AbstractProvider implements ProviderInterface {
 	public function is_enabled(): bool {
 		return true;
 	}
-
 }

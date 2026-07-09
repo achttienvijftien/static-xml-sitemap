@@ -20,7 +20,7 @@ class TermIndexer {
 	private TermItemStore $term_item_store;
 
 	public function __construct( SitemapStore $sitemap_store, TermItemStore $term_item_store ) {
-		$this->sitemap_store = $sitemap_store;
+		$this->sitemap_store   = $sitemap_store;
 		$this->term_item_store = $term_item_store;
 	}
 
@@ -44,13 +44,13 @@ class TermIndexer {
 		global $wpdb;
 
 		$last_modified_query = $wpdb->prepare(
-			"SELECT tr.term_taxonomy_id AS tt_id, p.ID, MAX(p.post_modified_gmt) AS last_modified " .
+			'SELECT tr.term_taxonomy_id AS tt_id, p.ID, MAX(p.post_modified_gmt) AS last_modified ' .
 			"FROM $wpdb->posts p " .
 			"JOIN $wpdb->term_relationships tr ON tr.object_id = p.ID " .
 			"JOIN $wpdb->term_taxonomy AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id" .
-			" AND tt.taxonomy = %s " .
+			' AND tt.taxonomy = %s ' .
 			"WHERE p.post_status IN ('publish') AND p.post_password = '' " .
-			"GROUP BY tr.term_taxonomy_id",
+			'GROUP BY tr.term_taxonomy_id',
 			$sitemap->object_subtype
 		);
 
@@ -64,5 +64,4 @@ class TermIndexer {
 
 		$this->term_item_store->update_sitemap_stats( $sitemap );
 	}
-
 }

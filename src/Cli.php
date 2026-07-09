@@ -66,5 +66,4 @@ class Cli {
 			\WP_CLI::warning( $e->getMessage() );
 		}
 	}
-
 }

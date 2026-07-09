@@ -12,5 +12,4 @@ trait LogFormatterTrait {
 	protected function format( string $message ): string {
 		return str_replace( 'AchttienVijftien\\Plugin\\StaticXMLSitemap\\', '', $message );
 	}
-
 }

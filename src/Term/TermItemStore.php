@@ -21,7 +21,8 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Store\StoreTrait;
  */
 class TermItemStore implements ItemStoreInterface {
 
-	use StoreTrait, ItemStoreTrait;
+	use StoreTrait;
+	use ItemStoreTrait;
 
 	public function __construct( int $page_size ) {
 		global $wpdb;
@@ -115,9 +116,9 @@ class TermItemStore implements ItemStoreInterface {
 		$last_modified = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM $this->table " .
-				"WHERE sitemap_id = %d AND last_modified IS NOT NULL " .
-				"ORDER BY last_modified DESC, last_modified_object_id DESC " .
-				"LIMIT 1",
+				'WHERE sitemap_id = %d AND last_modified IS NOT NULL ' .
+				'ORDER BY last_modified DESC, last_modified_object_id DESC ' .
+				'LIMIT 1',
 				$sitemap->id
 			)
 		);

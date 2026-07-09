@@ -26,5 +26,4 @@ interface ObjectQueryInterface {
 	public function set_order( string $order ): self;
 
 	public function set_sitemap( int $sitemap_id ): self;
-
 }

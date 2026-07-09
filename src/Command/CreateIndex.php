@@ -108,7 +108,5 @@ class CreateIndex {
 				\WP_CLI::warning( $result['error']->get_error_message() );
 			}
 		}
-
 	}
-
 }

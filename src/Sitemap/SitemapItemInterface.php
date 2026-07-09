@@ -46,5 +46,4 @@ interface SitemapItemInterface extends EntityInterface {
 	public static function for_object( $object, Sitemap $sitemap ): ?self;
 
 	public function get_field( string $field );
-
 }

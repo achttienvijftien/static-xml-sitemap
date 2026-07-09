@@ -16,7 +16,7 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Query\ObjectQueryInterface;
 class Query extends AbstractObjectQuery implements ObjectQueryInterface {
 
 	public string $taxonomy;
-	public bool $hide_empty = true;
+	public bool $hide_empty   = true;
 	public bool $hierarchical = false;
 
 	private TermCache $cache;
@@ -120,5 +120,4 @@ class Query extends AbstractObjectQuery implements ObjectQueryInterface {
 
 		return $this;
 	}
-
 }

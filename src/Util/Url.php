@@ -23,5 +23,4 @@ class Url {
 
 		return strncmp( $url, $home_url, strlen( $home_url ) ) === 0;
 	}
-
 }

@@ -29,12 +29,13 @@ class Indexer extends AbstractIndexer {
 	}
 
 	protected function get_sitemap_items(
-		Sitemap $sitemap, int $count
+		Sitemap $sitemap,
+		int $count
 	) {
 		global $wpdb;
 
-		$last_indexed_value   = $sitemap->last_indexed_value;
-		$last_indexed_id      = $sitemap->last_indexed_id;
+		$last_indexed_value = $sitemap->last_indexed_value;
+		$last_indexed_id    = $sitemap->last_indexed_id;
 
 		if ( null === $sitemap->object_subtype ) {
 			return [];
@@ -75,5 +76,4 @@ class Indexer extends AbstractIndexer {
 	protected function after_index( int $sitemap_id, int $total_items_inserted ): void {
 		do_action( 'static_sitemap_indexed_terms', $sitemap_id, $total_items_inserted );
 	}
-
 }

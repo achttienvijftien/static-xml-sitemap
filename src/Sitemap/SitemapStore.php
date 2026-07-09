@@ -164,5 +164,4 @@ class SitemapStore {
 	public function invalidate_cache( int $sitemap_id ): void {
 		$this->cache->delete( $sitemap_id );
 	}
-
 }

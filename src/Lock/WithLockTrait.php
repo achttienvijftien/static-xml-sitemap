@@ -16,5 +16,4 @@ trait WithLockTrait {
 			$lock->release();
 		}
 	}
-
 }
