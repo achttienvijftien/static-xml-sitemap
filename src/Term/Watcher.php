@@ -2,7 +2,7 @@
 /**
  * Watcher
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Watcher
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Term
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Term;

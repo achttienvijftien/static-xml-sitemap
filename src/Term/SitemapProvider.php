@@ -2,7 +2,7 @@
 /**
  * SitemapProvider
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Term
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Term;

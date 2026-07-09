@@ -2,7 +2,7 @@
 /**
  * PostItem
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Entity
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Post
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Post;

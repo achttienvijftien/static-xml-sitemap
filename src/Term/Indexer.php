@@ -2,7 +2,7 @@
 /**
  * Indexer
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Term;
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Term
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Term;
