@@ -9,6 +9,9 @@ namespace AchttienVijftien\Plugin\StaticXMLSitemap\Logger;
 
 use Psr\Log\LogLevel;
 
+/**
+ * Class SourceAwareLogger
+ */
 class SourceAwareLogger {
 
 	protected Logger $logger;

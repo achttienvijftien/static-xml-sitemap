@@ -71,6 +71,7 @@ class SitemapRenderer {
 
 		$this->writer->endElement();
 		$this->writer->endDocument();
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XMLWriter escapes all content.
 		echo $this->writer->outputMemory();
 	}
 

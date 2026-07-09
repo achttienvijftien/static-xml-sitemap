@@ -16,6 +16,7 @@ class PropertyAccessor {
 	 * @param mixed $var
 	 *
 	 * @return ArrayAccessor|ObjectAccessor
+	 * @throws \BadMethodCallException If the given value is neither an object nor an array.
 	 */
 	public static function create( $var ) {
 		if ( is_object( $var ) ) {

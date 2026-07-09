@@ -74,6 +74,7 @@ class TermItemStore implements ItemStoreInterface {
 		$terms_where   = isset( $terms_query['where'] ) ? ' AND ' . $terms_query['where'] : '';
 		$terms_orderby = $terms_query['orderby'] ?? '';
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from class prop; query-builder clauses are prepared.
 		$target_item_index = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT si.%i 
@@ -90,6 +91,7 @@ class TermItemStore implements ItemStoreInterface {
 				$field
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return null !== $target_item_index ? (int) $target_item_index : null;
 	}
@@ -115,6 +117,7 @@ class TermItemStore implements ItemStoreInterface {
 
 		$last_modified = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT * FROM $this->table " .
 				'WHERE sitemap_id = %d AND last_modified IS NOT NULL ' .
 				'ORDER BY last_modified DESC, last_modified_object_id DESC ' .

@@ -36,6 +36,7 @@ trait ItemStoreTrait {
 
 		return (bool) $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT 1 FROM $this->table WHERE %i = %d AND sitemap_id = %d",
 				$this->object_id_column,
 				$object_id,
@@ -57,6 +58,7 @@ trait ItemStoreTrait {
 
 		$items = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT * FROM $this->table WHERE %i = %d",
 				$this->object_id_column,
 				$object_id
@@ -82,6 +84,7 @@ trait ItemStoreTrait {
 
 		$items = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT * FROM $this->table WHERE %i = %d LIMIT 1",
 				$this->object_id_column,
 				$object_id
@@ -107,6 +110,7 @@ trait ItemStoreTrait {
 		global $wpdb;
 
 		$query = $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 			"UPDATE $this->table
 				SET %i = %i + %d
 				WHERE sitemap_id = %d
@@ -124,12 +128,14 @@ trait ItemStoreTrait {
 			$where_data   = $where[1] ?? null;
 
 			if ( $where_data ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- format string is a caller literal, prepared here.
 				$where_clause = $wpdb->prepare( $where_clause, $where_data );
 			}
 
 			$query .= " AND $where_clause";
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query assembled from prepared fragments above.
 		return $wpdb->query( $query );
 	}
 
@@ -174,6 +180,7 @@ trait ItemStoreTrait {
 
 		$item = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT * FROM $this->table si
 				 WHERE si.sitemap_id = %d 
 				 ORDER BY si.item_index DESC
@@ -190,6 +197,7 @@ trait ItemStoreTrait {
 
 		$item = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 				"SELECT * FROM $this->table si
 				 WHERE si.sitemap_id = %d AND si.item_index = %d
 				 LIMIT 1",
@@ -220,6 +228,7 @@ trait ItemStoreTrait {
 			$order = 'ASC';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from class prop; $compare/$order allowlisted above.
 		$items = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM $this->table si " .
@@ -231,6 +240,7 @@ trait ItemStoreTrait {
 				$limit
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $items ) {
 			return [];
@@ -243,6 +253,7 @@ trait ItemStoreTrait {
 		global $wpdb;
 
 		$item = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 			$wpdb->prepare( "SELECT * FROM $this->table WHERE id = %d", $item_id )
 		);
 

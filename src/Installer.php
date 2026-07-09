@@ -117,6 +117,7 @@ class Installer {
 			foreach ( $missing_tables as $table ) {
 				$error->add(
 					'missing_table',
+					/* translators: %s: database table name. */
 					sprintf( __( 'Missing table %s', 'static-xml-sitemap' ), $table )
 				);
 			}
@@ -211,6 +212,7 @@ SQL;
 		$suppress_errors = $wpdb->suppress_errors();
 
 		foreach ( $this->get_tables() as $table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from prefix + TABLES constant.
 			$described_table = $wpdb->get_results( "DESCRIBE $table" );
 
 			if ( ! is_array( $described_table ) || [] === $described_table ) {
@@ -235,6 +237,7 @@ SQL;
 	private function drop_tables() {
 		global $wpdb;
 		foreach ( $this->get_tables() as $table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from prefix + TABLES constant.
 			$wpdb->query( "DROP TABLE IF EXISTS $table" );
 		}
 	}

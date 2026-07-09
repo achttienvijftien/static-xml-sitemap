@@ -236,6 +236,7 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 				$column = $this->get_field( $field );
 
 				if ( $column ) {
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- column from get_field() allowlist.
 					$select[ $field ] = $wpdb->prepare( "$column as %i", $field );
 				}
 
@@ -279,6 +280,7 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 
 		$format = is_int( $after['value'] ) ? '%d' : '%s';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders -- columns from get_field(); $format literal %d/%s.
 		return $wpdb->prepare( "($field, $id) > ($format, %d)", $after['value'], $after['id'] );
 	}
 
@@ -305,15 +307,18 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		if ( 'BETWEEN' === $operator ) {
 			$format = array_map( fn( $v ) => is_int( $v ) ? '%d' : '%s', $value );
 
+			// phpcs:disable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders -- $format holds literal %d/%s; values prepared.
 			return $wpdb->prepare(
 				"si.item_index BETWEEN $format[0] AND $format[1]",
 				$value[0],
 				$value[1]
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders
 		}
 
 		$format = is_int( $value[0] ) ? '%d' : '%s';
 
+		// phpcs:ignore WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders -- operator allowlisted; $format literal %d/%s.
 		return $wpdb->prepare( "si.item_index $operator $format", $value[0] );
 	}
 }

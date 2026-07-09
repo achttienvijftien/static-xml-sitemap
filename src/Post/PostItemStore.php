@@ -70,6 +70,7 @@ class PostItemStore implements ItemStoreInterface {
 		$posts_where   = isset( $posts_query['where'] ) ? ' AND ' . $posts_query['where'] : '';
 		$posts_orderby = $posts_query['orderby'] ?? '';
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from class prop; query-builder clauses are prepared.
 		$target_item_index = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT si.%i 
@@ -86,6 +87,7 @@ class PostItemStore implements ItemStoreInterface {
 				$field
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return null !== $target_item_index ? (int) $target_item_index : null;
 	}
@@ -109,6 +111,7 @@ class PostItemStore implements ItemStoreInterface {
 	public function get_last_modified( Sitemap $sitemap ) {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- get_query() output built from prepared query-builder clauses.
 		$post_id = $wpdb->get_var(
 			( new Query( $sitemap->object_subtype ) )
 				->set_fields( [ 'id' ] )
@@ -118,6 +121,7 @@ class PostItemStore implements ItemStoreInterface {
 				->set_limit( 1 )
 				->get_query()
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! $post_id ) {
 			return null;

@@ -31,6 +31,7 @@ trait ContainerTrait {
 		$factory = $this->factories[ $id ] ?? null;
 
 		if ( null === $factory ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- exception message is logged/escaped at output.
 			throw new ServiceNotFoundException( "Service '$id' not found in container." );
 		}
 

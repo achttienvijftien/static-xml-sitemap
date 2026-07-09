@@ -118,6 +118,7 @@ class Paginator {
 			->set_limit( 1 )
 			->get_query();
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- get_query() output built from prepared query-builder clauses.
 		return $wpdb->get_var( $query );
 	}
 

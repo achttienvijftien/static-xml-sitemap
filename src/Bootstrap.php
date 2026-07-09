@@ -42,6 +42,7 @@ class Bootstrap {
 				->get( Plugin::class );
 		} catch ( NotFoundExceptionInterface $e ) {
 			$error_message = sprintf(
+				/* translators: %s: error message returned while loading the plugin. */
 				esc_html__( 'Static XML sitemap plugin could not be loaded: %s', 'static-xml-sitemap' ),
 				$e->getMessage()
 			);
@@ -55,7 +56,7 @@ class Bootstrap {
 			'admin_notices',
 			function () use ( $error ) {
 				echo '<div class="notice notice-error is-dismissible"><p>'
-				. $error->get_error_message()
+				. wp_kses_post( $error->get_error_message() )
 				. '</p></div>';
 			}
 		);

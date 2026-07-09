@@ -85,6 +85,7 @@ class UserItemStore implements ItemStoreInterface {
 		$users_where   = isset( $users_query['where'] ) ? ' AND ' . $users_query['where'] : '';
 		$users_orderby = $users_query['orderby'];
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from class prop; query-builder clauses are prepared.
 		$target_item_index = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT si.%i 
@@ -101,6 +102,7 @@ class UserItemStore implements ItemStoreInterface {
 				$field
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return null !== $target_item_index ? (int) $target_item_index : null;
 	}
@@ -108,6 +110,7 @@ class UserItemStore implements ItemStoreInterface {
 	public function get_last_modified( Sitemap $sitemap ): ?UserItem {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- get_query() output built from prepared query-builder clauses.
 		$user_id = $wpdb->get_var(
 			( new Query() )->set_fields( [ 'id' ] )
 				->set_orderby( 'modified' )
@@ -116,6 +119,7 @@ class UserItemStore implements ItemStoreInterface {
 				->set_limit( 1 )
 				->get_query()
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! $user_id ) {
 			return null;

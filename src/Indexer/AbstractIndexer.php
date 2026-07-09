@@ -109,7 +109,7 @@ abstract class AbstractIndexer {
 
 		$logger = $this->logger->for_source( __METHOD__ );
 
-		if ( $sitemap->status === Sitemap::STATUS_INDEXED && ! $this->force_recreate ) {
+		if ( Sitemap::STATUS_INDEXED === $sitemap->status && ! $this->force_recreate ) {
 			return new \WP_Error( 'already_indexed', "$sitemap index already created" );
 		}
 
@@ -150,7 +150,7 @@ abstract class AbstractIndexer {
 				if ( ! $this->lock->refresh() ) {
 					throw new IndexerException( "Could not refresh lock for $sitemap" );
 				}
-			} while ( count( $items ) > 0 );
+			} while ( [] !== $items );
 		} catch ( \Exception $e ) {
 			$logger->error( $e->getMessage() );
 			$error = true;
@@ -211,10 +211,12 @@ abstract class AbstractIndexer {
 		$item->item_index = $item_index;
 
 		if ( ! $this->item_store->insert_item( $item ) ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- exception message is logged, not output.
 			throw new IndexerException(
 				"Error inserting sitemap item $item: $wpdb->last_error",
 				IndexerException::ITEM_INSERT_ERROR
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$sitemap->last_modified   = DateTime::to_mysql( $object_modified );
@@ -223,10 +225,12 @@ abstract class AbstractIndexer {
 		++$sitemap->item_count;
 
 		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- exception message is logged, not output.
 			throw new IndexerException(
 				"Error updating sitemap after inserting item $item: $wpdb->last_error",
 				IndexerException::SITEMAP_UPDATE_ERROR
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return true;

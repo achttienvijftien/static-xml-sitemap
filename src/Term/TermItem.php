@@ -36,7 +36,8 @@ class TermItem implements SitemapItemInterface {
 	/**
 	 * TermItem constructor.
 	 *
-	 * @param array|object{id: int, term_taxonomy_id: int, sitemap_id: int, url: string, last_modified: string|null, last_modified_object_id: int|null, item_index: int|null, next_item_index: int|null} $data
+	 * @param array|object{id: int, term_taxonomy_id: int, sitemap_id: int, url: string, last_modified: string|null,
+	 *     last_modified_object_id: int|null, item_index: int|null, next_item_index: int|null} $data
 	 */
 	public function __construct( $data ) {
 		$data = PropertyAccessor::create( $data );

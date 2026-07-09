@@ -43,8 +43,8 @@ class PostItem implements SitemapItemInterface {
 		$this->post_id         = null !== $data->post_id ? (int) $data->post_id : null;
 		$this->sitemap_id      = (int) $data->sitemap_id;
 		$this->url             = $data->url;
-		$this->item_index      = $data->item_index !== null ? (int) $data->item_index : null;
-		$this->next_item_index = $data->next_item_index !== null ? (int) $data->next_item_index : null;
+		$this->item_index      = null !== $data->item_index ? (int) $data->item_index : null;
+		$this->next_item_index = null !== $data->next_item_index ? (int) $data->next_item_index : null;
 	}
 
 	public static function compare_objects( PostItem $a, PostItem $b ): int {

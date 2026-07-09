@@ -148,6 +148,7 @@ class SitemapStore {
 		}
 
 		$sitemap = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 			$wpdb->prepare( "SELECT * FROM $this->table WHERE id = %d", $id )
 		);
 

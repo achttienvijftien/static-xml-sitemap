@@ -175,7 +175,8 @@ class BatchReindex {
 
 		// Shift the item indexes between the offset positions to account for removals or
 		// make room for insertions.
-		for ( $i = 0; $i < count( $offset_indexes ); $i++ ) {
+		$offset_index_count = count( $offset_indexes );
+		for ( $i = 0; $i < $offset_index_count; $i++ ) {
 			$index_offset = $this->offsets[ $offset_indexes[ $i ] ];
 			if ( 0 === $index_offset ) {
 				continue;
@@ -203,7 +204,7 @@ class BatchReindex {
 
 			$logger->debug(
 				'offset_next_index('
-				. json_encode(
+				. wp_json_encode(
 					[
 						'sitemap' => $this->sitemap->id,
 						'offset'  => $index_offset,

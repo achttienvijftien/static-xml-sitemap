@@ -29,6 +29,7 @@ class ErrorLog extends AbstractLogger implements LoggerInterface {
 	public function log( $level, $message, array $context = [] ): void {
 		$message = $this->format( $message );
 
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- error logging is the purpose of this logger.
 		error_log( "$level: $message" );
 	}
 }

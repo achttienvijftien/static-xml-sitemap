@@ -58,6 +58,7 @@ class JobStore {
 		$fields  = implode( ', ', $fields );
 		$formats = implode( ', ', $formats );
 
+		// phpcs:disable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders -- table from prop; fields/formats are %i/%s lists.
 		$num_rows = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO $this->table ($fields) VALUES ($formats)"
@@ -65,6 +66,7 @@ class JobStore {
 				array_merge( $field_names, $values )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders
 
 		if ( false === $num_rows ) {
 			return null;
@@ -83,6 +85,7 @@ class JobStore {
 		global $wpdb;
 
 		$job = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from class property.
 			$wpdb->prepare( "SELECT * FROM $this->table WHERE id = %d", $id )
 		);
 
@@ -108,6 +111,7 @@ class JobStore {
 		$skip_locked     = $this->supports_skip_locked();
 		$skip_locked_sql = $skip_locked ? 'SKIP LOCKED' : '';
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from prop; $skip_locked_sql is a literal keyword.
 		$select_sql = $wpdb->prepare(
 			"SELECT id FROM $this->table
 			WHERE sitemap_id = %d 
@@ -121,7 +125,9 @@ class JobStore {
 			$current_time,
 			$limit
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from prop; $select_sql is a prepared subquery.
 		$update_sql = $wpdb->prepare(
 			"UPDATE $this->table j1
 			JOIN ( $select_sql ) j2 ON j1.id = j2.id
@@ -129,7 +135,9 @@ class JobStore {
 			$claim_id,
 			$current_time
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $update_sql fully prepared above.
 		$updated = $wpdb->query( $update_sql );
 
 		if ( false === $updated ) {
@@ -142,15 +150,15 @@ class JobStore {
 	private function supports_skip_locked(): bool {
 		global $wpdb;
 
-		// Check MySQL version
+		// Check MySQL version.
 		$version = $wpdb->get_var( 'SELECT VERSION()' );
 
-		// MySQL 8.0.1+ supports SKIP LOCKED
+		// MySQL 8.0.1+ supports SKIP LOCKED.
 		if ( strpos( $version, 'MySQL' ) !== false || strpos( $version, 'mysql' ) !== false ) {
 			return version_compare( $version, '8.0.1', '>=' );
 		}
 
-		// MariaDB 10.6+ supports SKIP LOCKED
+		// MariaDB 10.6+ supports SKIP LOCKED.
 		if ( strpos( $version, 'MariaDB' ) !== false ) {
 			preg_match( '/(\d+\.\d+\.\d+)/', $version, $matches );
 			if ( isset( $matches[1] ) ) {
@@ -166,6 +174,7 @@ class JobStore {
 
 		$jobs = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from prop; claim_id via x%s hex literal.
 				"SELECT * FROM $this->table WHERE claim_id = x%s ORDER BY id",
 				$claim_id
 			)
@@ -179,6 +188,7 @@ class JobStore {
 
 		return $wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from prop; claim_id via x%s hex literal.
 				"UPDATE $this->table SET claim_id = NULL, claimed_at = NULL WHERE claim_id = x%s",
 				$claim_id
 			)

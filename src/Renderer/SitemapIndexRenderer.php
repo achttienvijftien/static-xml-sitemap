@@ -54,6 +54,7 @@ class SitemapIndexRenderer {
 		$this->writer->writeRaw( apply_filters( 'static_sitemap_index_content', '' ) );
 		$this->writer->endElement();
 		$this->writer->endDocument();
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XMLWriter escapes all content.
 		echo $this->writer->outputMemory();
 	}
 

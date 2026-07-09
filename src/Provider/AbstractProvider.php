@@ -24,6 +24,9 @@ use AchttienVijftien\Plugin\StaticXMLSitemap\Util\ObjectType;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Watcher\Invalidations;
 use AchttienVijftien\Plugin\StaticXMLSitemap\Watcher\WatcherInterface;
 
+/**
+ * Class AbstractProvider
+ */
 abstract class AbstractProvider implements ProviderInterface {
 
 	use WithLockTrait;
@@ -420,7 +423,7 @@ abstract class AbstractProvider implements ProviderInterface {
 		}
 
 		if ( $invalidations & Invalidations::OBJECT_EXISTS
-			|| $invalidations & Invalidations::IS_INDEXABLE && ! $is_indexable
+			|| ( $invalidations & Invalidations::IS_INDEXABLE && ! $is_indexable )
 		) {
 			$this->job_store->insert_job( Job::remove_item( $item ) );
 

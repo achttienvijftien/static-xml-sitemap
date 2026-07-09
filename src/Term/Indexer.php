@@ -62,6 +62,7 @@ class Indexer extends AbstractIndexer {
 			$query->set_after( $orderby, $last_indexed_value, $last_indexed_id );
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- get_query() output built from prepared query-builder clauses.
 		return $wpdb->get_results( $query->get_query() );
 	}
 

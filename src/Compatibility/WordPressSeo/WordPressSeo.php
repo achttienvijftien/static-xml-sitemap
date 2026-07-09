@@ -202,7 +202,7 @@ class WordPressSeo {
 			return false;
 		}
 
-		if ( in_array( $post->ID, $this->get_excluded_post_ids( $post->post_type ) ) ) {
+		if ( in_array( $post->ID, $this->get_excluded_post_ids( $post->post_type ), true ) ) {
 			return false;
 		}
 
@@ -279,7 +279,7 @@ class WordPressSeo {
 			$post_statuses = [ 'publish' ];
 		}
 
-		if ( $post_type === 'attachment' && ! in_array( 'inherit', $post_statuses, true ) ) {
+		if ( 'attachment' === $post_type && ! in_array( 'inherit', $post_statuses, true ) ) {
 			$post_statuses[] = 'inherit';
 		}
 
@@ -289,7 +289,7 @@ class WordPressSeo {
 	public function posts_clauses( $clauses, PostQuery $query ): array {
 		global $wpdb;
 
-		if ( $query->post_type !== 'attachment' ) {
+		if ( 'attachment' !== $query->post_type ) {
 			return $clauses;
 		}
 
@@ -345,7 +345,7 @@ class WordPressSeo {
 		$url['pri'] = 1;
 		$modified   = max( $post->post_modified_gmt, $post->post_date_gmt );
 
-		if ( $modified !== '0000-00-00 00:00:00' ) {
+		if ( '0000-00-00 00:00:00' !== $modified ) {
 			$url['mod'] = $modified;
 		}
 
@@ -681,7 +681,7 @@ class WordPressSeo {
 			return false;
 		}
 
-		if ( $taxonomy === 'post_format' && $this->get_wpseo_option( 'disable-post_format', false ) ) {
+		if ( 'post_format' === $taxonomy && $this->get_wpseo_option( 'disable-post_format', false ) ) {
 			return false;
 		}
 
@@ -898,6 +898,7 @@ class WordPressSeo {
 
 		$post_statuses = esc_sql( $post_statuses );
 
+		// phpcs:disable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders -- values esc_sql'd above; IN() of literals, not %s.
 		$last_modified = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT p.ID, p.post_modified_gmt ' .
@@ -914,6 +915,7 @@ class WordPressSeo {
 				$item->term_taxonomy_id,
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL,WordPress.DB.PreparedSQLPlaceholders
 
 		return $last_modified instanceof \stdClass ? $last_modified : null;
 	}
@@ -1000,7 +1002,7 @@ class WordPressSeo {
 			$post_statuses = [ 'publish' ];
 		}
 
-		if ( $post_type === 'attachment' && ! in_array( 'inherit', $post_statuses, true ) ) {
+		if ( 'attachment' === $post_type && ! in_array( 'inherit', $post_statuses, true ) ) {
 			$post_statuses[] = 'inherit';
 		}
 

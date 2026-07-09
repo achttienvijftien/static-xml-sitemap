@@ -36,7 +36,8 @@ class Job implements EntityInterface {
 	/**
 	 * Job constructor.
 	 *
-	 * @param array|object{id: int, sitemap_id: int, sitemap_item_id: int, object_id: int|null, action: string, scheduled_at: string, claim_id: string|null, claimed_at: string|null} $data
+	 * @param array|object{id: int, sitemap_id: int, sitemap_item_id: int, object_id: int|null, action: string,
+	 *     scheduled_at: string, claim_id: string|null, claimed_at: string|null} $data
 	 */
 	public function __construct( $data ) {
 		$data = PropertyAccessor::create( $data );

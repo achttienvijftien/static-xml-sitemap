@@ -1,6 +1,8 @@
 <?php
 /**
  * WatcherInterface
+ *
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Watcher
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Watcher;

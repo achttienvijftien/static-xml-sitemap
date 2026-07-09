@@ -47,7 +47,7 @@ class UserWatcher {
 		add_action( 'remove_user_role', [ $this, 'update_user_role' ] );
 	}
 
-	public function updated_user_meta( $meta_id, $object_id, $meta_key, $meta_value ): void {
+	public function updated_user_meta( $meta_id, $object_id, $meta_key ): void {
 		if ( ! key_exists( $meta_key, $this->meta_key_events ) ) {
 			return;
 		}

@@ -117,6 +117,7 @@ trait StoreTrait {
 			$ids
 		);
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table from class prop; $where is a prepared id-IN clause.
 		$result = $wpdb->query( "DELETE FROM $this->table WHERE $where" );
 
 		if ( $this->cache ) {
@@ -132,9 +133,11 @@ trait StoreTrait {
 		global $wpdb;
 
 		if ( $prepare ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- format string from internal callers, prepared here.
 			$query = $wpdb->prepare( $query, $prepare );
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query prepared above or literal from internal callers.
 		return $wpdb->query( $query );
 	}
 

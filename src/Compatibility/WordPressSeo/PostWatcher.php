@@ -43,7 +43,7 @@ class PostWatcher {
 		add_action( 'post_updated', [ $this, 'post_updated' ], 10, 3 );
 	}
 
-	public function updated_post_meta( $meta_id, $object_id, $meta_key, $meta_value ): void {
+	public function updated_post_meta( $meta_id, $object_id, $meta_key ): void {
 		if ( ! key_exists( $meta_key, $this->meta_key_events ) ) {
 			return;
 		}
@@ -59,8 +59,8 @@ class PostWatcher {
 	 * @return void
 	 */
 	public function post_updated( $post_id, \WP_Post $post_after, \WP_Post $post_before ): void {
-		if ( $post_after->post_modified_gmt === '0000-00-00 00:00:00'
-			|| $post_before->post_modified_gmt === '0000-00-00 00:00:00'
+		if ( '0000-00-00 00:00:00' === $post_after->post_modified_gmt
+			|| '0000-00-00 00:00:00' === $post_before->post_modified_gmt
 			|| $post_after->post_modified_gmt === $post_before->post_modified_gmt
 		) {
 			return;
@@ -71,7 +71,7 @@ class PostWatcher {
 		$is_indexable_before = $this->provider->is_indexable( $post_before );
 		$is_indexable_after  = $this->provider->is_indexable( $post_after );
 
-		if ( ! ( $item && $is_indexable_after || ! $item && $is_indexable_before && $is_indexable_after ) ) {
+		if ( ! ( ( $item && $is_indexable_after ) || ( ! $item && $is_indexable_before && $is_indexable_after ) ) ) {
 			return;
 		}
 

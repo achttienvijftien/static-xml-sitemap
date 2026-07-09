@@ -37,7 +37,8 @@ class Sitemap implements EntityInterface {
 	/**
 	 * Sitemap constructor.
 	 *
-	 * @param array|object{id: int, object_type: string, object_subtype: string, last_modified: string, last_object_id: int, last_item_index: int, last_indexed_value: mixed, last_indexed_it: int, item_count: int, status: string} $data
+	 * @param array|object{id: int, object_type: string, object_subtype: string, last_modified: string, last_object_id: int,
+	 *     last_item_index: int, last_indexed_value: mixed, last_indexed_it: int, item_count: int, status: string} $data
 	 */
 	public function __construct( $data ) {
 		$data = PropertyAccessor::create( $data );
@@ -76,11 +77,11 @@ class Sitemap implements EntityInterface {
 	}
 
 	public function is_updating(): bool {
-		return $this->status === self::STATUS_UPDATING;
+		return self::STATUS_UPDATING === $this->status;
 	}
 
 	public function is_indexing(): bool {
-		return $this->status === self::STATUS_INDEXING;
+		return self::STATUS_INDEXING === $this->status;
 	}
 
 	public function __toString() {

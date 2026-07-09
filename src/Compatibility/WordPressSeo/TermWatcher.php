@@ -52,7 +52,7 @@ class TermWatcher {
 		add_action( 'edited_term_taxonomy', [ $this, 'edited_term_taxonomy' ], 10, 3 );
 	}
 
-	public function updated_term_meta( $meta_id, $object_id, $meta_key, $meta_value ): void {
+	public function updated_term_meta( $meta_id, $object_id, $meta_key ): void {
 		if ( ! key_exists( $meta_key, $this->meta_key_events ) ) {
 			return;
 		}
@@ -190,7 +190,7 @@ class TermWatcher {
 
 		$is_viewable  = $this->is_post_publicly_viewable( $post_after );
 		$was_viewable = $this->is_post_publicly_viewable( $post_before );
-		$updated      = $is_viewable && ! $was_viewable || ! $is_viewable && $was_viewable;
+		$updated      = ( $is_viewable && ! $was_viewable ) || ( ! $is_viewable && $was_viewable );
 
 		if ( ! $updated ) {
 			return;
@@ -218,8 +218,8 @@ class TermWatcher {
 			return;
 		}
 
-		if ( $is_viewable && $item->last_modified < $post->post_modified_gmt
-			|| ! $is_viewable && $item->last_modified_object_id === $post->ID
+		if ( ( $is_viewable && $item->last_modified < $post->post_modified_gmt )
+			|| ( ! $is_viewable && $item->last_modified_object_id === $post->ID )
 		) {
 			$this->watcher->add_events( $term->term_taxonomy_id, self::TERM_LAST_MODIFIED_UPDATED );
 		}
