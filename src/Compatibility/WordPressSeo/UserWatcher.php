@@ -22,6 +22,8 @@ class UserWatcher {
 	public const USER_ROLES_UPDATED      = 1 << 13;
 
 	private BaseUserWatcher $watcher;
+	private UserSitemapProvider $provider;
+	private UserItemStore $user_item_store;
 	private array $meta_key_events;
 
 	public function __construct( BaseUserWatcher $base_watcher, UserSitemapProvider $provider, UserItemStore $user_item_store ) {

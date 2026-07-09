@@ -265,15 +265,19 @@ trait ItemStoreTrait {
 		}
 
 		$update = $this->query(
-			"UPDATE %i as si, ($object_query) AS o" .
-			'SET si.next_item_index = o.`row_number` - 1' .
+			"UPDATE %i as si, ($object_query) AS o " .
+			'SET si.next_item_index = o.`row_number` - 1 ' .
 			'WHERE si.%i = o.id' . $id_not_in,
 			[ $this->table, $this->object_id_column ]
 		);
 
+		if ( ! $update ) {
+			return null;
+		}
+
 		$this->commit_next_index( $sitemap->id );
 
-		return $update ? $this->update_sitemap_stats( $sitemap ) : null;
+		return $this->update_sitemap_stats( $sitemap );
 	}
 
 	public function update_sitemap_stats( Sitemap $sitemap ): Sitemap {

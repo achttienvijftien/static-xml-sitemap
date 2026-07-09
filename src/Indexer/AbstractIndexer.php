@@ -57,7 +57,7 @@ abstract class AbstractIndexer {
 		return $this;
 	}
 
-	public function run( string $object_subtype = null ) {
+	public function run( ?string $object_subtype = null ) {
 		$logger = $this->logger->for_source( __METHOD__ );
 
 		$sitemap = $this->sitemap_store->get_by_object_type(
@@ -189,10 +189,12 @@ abstract class AbstractIndexer {
 	protected function add_to_sitemap( Sitemap $sitemap, $item_data, int $item_index ): bool {
 		global $wpdb;
 
-		$object_id          = (int) $item_data->id;
-		$object_modified    = $item_data->modified ?? null;
-		$last_indexed_value = $item_data->{$this->orderby} ?? null;
-		$last_indexed_id    = $object_id;
+		$object_id       = (int) $item_data->id;
+		$object_modified = $item_data->modified ?? null;
+
+		// Advance the keyset cursor for skipped items too, or paging would repeat them forever.
+		$sitemap->last_indexed_value = $item_data->{$this->orderby} ?? null;
+		$sitemap->last_indexed_id    = $object_id;
 
 		$item = $this->provider->get_item_for_object( $object_id );
 
@@ -215,11 +217,9 @@ abstract class AbstractIndexer {
 			);
 		}
 
-		$sitemap->last_modified      = DateTime::to_mysql( $object_modified );
-		$sitemap->last_object_id     = $object_id;
-		$sitemap->last_item_index    = $item_index;
-		$sitemap->last_indexed_value = $last_indexed_value;
-		$sitemap->last_indexed_id    = $last_indexed_id;
+		$sitemap->last_modified   = DateTime::to_mysql( $object_modified );
+		$sitemap->last_object_id  = $object_id;
+		$sitemap->last_item_index = $item_index;
 		$sitemap->item_count++;
 
 		if ( ! $this->sitemap_store->update_sitemap( $sitemap ) ) {
