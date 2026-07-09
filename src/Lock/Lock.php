@@ -46,7 +46,7 @@ class Lock {
 	 *
 	 * @return void
 	 */
-	public function release( int $lock_time = null, bool $force = false ): void {
+	public function release( ?int $lock_time = null, bool $force = false ): void {
 		global $wpdb;
 
 		if ( $this->have_lock || $force ) {
@@ -70,7 +70,7 @@ class Lock {
 	 *
 	 * @return bool
 	 */
-	public function acquire( int $wait = null ): bool {
+	public function acquire( ?int $wait = null ): bool {
 		global $wpdb;
 
 		$wait ??= $this->wait;

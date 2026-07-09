@@ -2,7 +2,7 @@
 /**
  * Container
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Container
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Container;

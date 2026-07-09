@@ -2,7 +2,7 @@
 /**
  * Sitemap
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Entity
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Sitemap;
@@ -102,7 +102,7 @@ class Sitemap implements EntityInterface {
 		}
 	}
 
-	public static function for_object_type( string $object_type, string $object_subtype = null ): ?self {
+	public static function for_object_type( string $object_type, ?string $object_subtype = null ): ?self {
 		$sitemap = new self( [
 			'object_type'    => $object_type,
 			'object_subtype' => $object_subtype,
