@@ -1,10 +1,10 @@
 <?php
 // phpcs:ignoreFile
-define( 'ABSPATH', dirname( __FILE__ ) . '/var/www/html/' );
+define( 'ABSPATH', '/var/www/html/' );
 define( 'WP_DEFAULT_THEME', 'default' );
 define( 'WP_DEBUG', true );
 
-define( 'DB_NAME', 'wordpress' );
+define( 'DB_NAME', getenv( 'WP_TESTS_DB_NAME' ) ?: 'wordpress' );
 define( 'DB_USER', 'wordpress' );
 define( 'DB_PASSWORD', 'wordpress' );
 define( 'DB_HOST', 'db' );

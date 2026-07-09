@@ -43,14 +43,13 @@
     "test": [
       "Composer\\Config::disableProcessTimeout",
       "@composer install @no_additional_args",
-      "docker-compose up -d --no-recreate @no_additional_args",
-      "docker-compose exec wordpress bash -c 'cd /var/www/html/wp-content/plugins/static-xml-sitemap && ./vendor/bin/phpunit @additional_args'"
+      "bin/phpunit @additional_args"
     ],
     "test:watch": [
       "Composer\\Config::disableProcessTimeout",
       "@composer install @no_additional_args",
-      "docker-compose up -d --no-recreate @no_additional_args",
-      "docker-compose exec wordpress bash -c 'cd /var/www/html/wp-content/plugins/static-xml-sitemap && ./vendor/bin/phpunit-watcher watch @additional_args < /dev/tty'"
+      "docker compose up -d --wait @no_additional_args",
+      "docker compose exec wordpress bash -c 'cd /var/www/html/wp-content/plugins/static-xml-sitemap && ./vendor/bin/phpunit-watcher watch @additional_args < /dev/tty'"
     ]
   },
   "minimum-stability": "dev",
