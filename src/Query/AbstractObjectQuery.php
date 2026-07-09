@@ -85,6 +85,10 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		return $this;
 	}
 
+	public function set_hide_empty( bool $hide_empty ): self {
+		return $this;
+	}
+
 	public function set_sitemap( int $sitemap_id ): self {
 		$this->sitemap = $sitemap_id;
 
@@ -100,11 +104,11 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 	public function get_query(): string {
 		$clauses = $this->get_query_clauses();
 
-		$query = "SELECT ${clauses['select']}\n";
-		$query .= "FROM ${clauses['from']}\n";
+		$query = "SELECT {$clauses['select']}\n";
+		$query .= "FROM {$clauses['from']}\n";
 
 		if ( ! empty( $clauses['join'] ) ) {
-			$query .= "${clauses['join']}\n";
+			$query .= "{$clauses['join']}\n";
 		}
 
 		if ( ! empty( $clauses['where'] ) ) {
@@ -112,11 +116,11 @@ abstract class AbstractObjectQuery implements ObjectQueryInterface {
 		}
 
 		if ( ! empty( $clauses['orderby'] ) ) {
-			$query .= "ORDER BY ${clauses['orderby']}\n";
+			$query .= "ORDER BY {$clauses['orderby']}\n";
 		}
 
 		if ( ! empty( $clauses['limit'] ) ) {
-			$query .= "LIMIT ${clauses['limit']}\n";
+			$query .= "LIMIT {$clauses['limit']}\n";
 		}
 
 		return $query;

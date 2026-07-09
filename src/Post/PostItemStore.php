@@ -2,7 +2,7 @@
 /**
  * PostItemStore
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Store
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Post
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Post;
@@ -115,6 +115,7 @@ class PostItemStore implements ItemStoreInterface {
 				->set_order( 'DESC' )
 				->set_sitemap( $sitemap->id )
 				->set_limit( 1 )
+				->get_query()
 		);
 
 		if ( ! $post_id ) {
@@ -124,7 +125,7 @@ class PostItemStore implements ItemStoreInterface {
 		return $this->get_one_by_object_id( $post_id );
 	}
 
-	public function get_object_query( string $object_subtype = null ): Query {
+	public function get_object_query( ?string $object_subtype = null ): Query {
 		return new Query( $object_subtype );
 	}
 

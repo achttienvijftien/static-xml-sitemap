@@ -87,6 +87,8 @@ abstract class AbstractProvider implements ProviderInterface {
 
 		if ( null === $sitemap ) {
 			$logger->warning( "Sitemap with id $item->sitemap_id not found" );
+
+			return;
 		}
 
 		if ( $sitemap->is_indexing() ) {
