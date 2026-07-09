@@ -22,6 +22,14 @@
         <exclude-pattern>tests/*</exclude-pattern>
     </rule>
 
+    <!-- House policy: docblocks only where types cannot express the contract. -->
+    <rule ref="Squiz.Commenting.FunctionComment"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.VariableComment"><severity>0</severity></rule>
+    <rule ref="Generic.Commenting.DocComment"><severity>0</severity></rule>
+
+    <!-- $object et al. are deliberate domain vocabulary. -->
+    <rule ref="Universal.NamingConventions.NoReservedKeywordParameterNames"><severity>0</severity></rule>
+
     <rule ref="Universal.Arrays">
         <exclude name="Universal.Arrays.MixedArrayKeyTypes"/>
         <exclude name="Universal.Arrays.MixedKeyedUnkeyedArray"/>
