@@ -2,7 +2,7 @@
 /**
  * JobStore
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Store
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Job
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Job;

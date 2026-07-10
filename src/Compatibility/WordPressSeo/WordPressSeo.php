@@ -2,7 +2,7 @@
 /**
  * WordPressSeo
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Compatibility
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Compatibility\WordPressSeo
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Compatibility\WordPressSeo;

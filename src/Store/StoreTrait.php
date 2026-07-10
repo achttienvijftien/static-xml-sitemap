@@ -128,7 +128,7 @@ trait StoreTrait {
 		return $result;
 	}
 
-	public function query( string $query, array $prepare = null ) {
+	public function query( string $query, ?array $prepare = null ) {
 		global $wpdb;
 
 		if ( $prepare ) {

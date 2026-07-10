@@ -218,7 +218,7 @@ class TermWatcher {
 			return;
 		}
 
-		if ( $is_viewable && (int) $item->last_modified < $post->post_modified_gmt
+		if ( $is_viewable && $item->last_modified < $post->post_modified_gmt
 			|| ! $is_viewable && $item->last_modified_object_id === $post->ID
 		) {
 			$this->watcher->add_events( $term->term_taxonomy_id, self::TERM_LAST_MODIFIED_UPDATED );

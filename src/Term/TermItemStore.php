@@ -116,7 +116,7 @@ class TermItemStore implements ItemStoreInterface {
 			$wpdb->prepare(
 				"SELECT * FROM $this->table " .
 				"WHERE sitemap_id = %d AND last_modified IS NOT NULL " .
-				"ORDER BY last_modified, last_modified_object_id DESC " .
+				"ORDER BY last_modified DESC, last_modified_object_id DESC " .
 				"LIMIT 1",
 				$sitemap->id
 			)
@@ -125,7 +125,7 @@ class TermItemStore implements ItemStoreInterface {
 		return $last_modified ? new TermItem( $last_modified ) : null;
 	}
 
-	public function get_object_query( string $object_subtype = null ): Query {
+	public function get_object_query( ?string $object_subtype = null ): Query {
 		return new Query( $object_subtype );
 	}
 

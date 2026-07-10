@@ -113,6 +113,7 @@ class UserItemStore implements ItemStoreInterface {
 				->set_order( 'DESC' )
 				->set_sitemap( $sitemap->id )
 				->set_limit( 1 )
+				->get_query()
 		);
 
 		if ( ! $user_id ) {
@@ -122,7 +123,7 @@ class UserItemStore implements ItemStoreInterface {
 		return $this->get_one_by_object_id( $user_id );
 	}
 
-	public function get_object_query( string $object_subtype = null ): Query {
+	public function get_object_query( ?string $object_subtype = null ): Query {
 		return new Query();
 	}
 

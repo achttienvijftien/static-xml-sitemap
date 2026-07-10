@@ -86,7 +86,7 @@ interface ItemStoreInterface {
 
 	public function update_query( array $data, $where = null, $format = null, $where_format = null );
 
-	public function query( string $query, array $prepare = null );
+	public function query( string $query, ?array $prepare = null );
 
 	public function delete_query( ?array $where = null, $where_format = null );
 
@@ -151,7 +151,7 @@ interface ItemStoreInterface {
 	/**
 	 * @return PostQuery|TermQuery|UserQuery
 	 */
-	public function get_object_query( string $object_subtype = null ): ObjectQueryInterface;
+	public function get_object_query( ?string $object_subtype = null ): ObjectQueryInterface;
 
 	public function get_orderby(): string;
 }

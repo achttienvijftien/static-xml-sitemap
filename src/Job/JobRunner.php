@@ -2,7 +2,7 @@
 /**
  * JobRunner
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Job
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Job;

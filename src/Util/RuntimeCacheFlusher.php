@@ -36,7 +36,7 @@ class RuntimeCacheFlusher {
 			$wp_object_cache->cache = [];
 		}
 
-		if ( is_callable( $wp_object_cache, '__remoteset' ) ) {
+		if ( method_exists( $wp_object_cache, '__remoteset' ) ) {
 			call_user_func( [ $wp_object_cache, '__remoteset' ] );
 		}
 	}

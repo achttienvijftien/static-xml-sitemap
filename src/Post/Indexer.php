@@ -1,6 +1,8 @@
 <?php
 /**
+ * Indexer
  *
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Post
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Post;

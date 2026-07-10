@@ -2,7 +2,7 @@
 /**
  * CreateIndex
  *
- * @package AchttienVijftien\Plugin\StaticXMLSitemap\Command;
+ * @package AchttienVijftien\Plugin\StaticXMLSitemap\Command
  */
 
 namespace AchttienVijftien\Plugin\StaticXMLSitemap\Command;
@@ -94,15 +94,15 @@ class CreateIndex {
 		foreach ( $results as $result ) {
 			$object_type_description = $object_type;
 			if ( 'post' === $object_type ) {
-				$object_type_description = "post type ${result['object_subtype']}";
+				$object_type_description = "post type {$result['object_subtype']}";
 			}
 			if ( 'user' === $object_type ) {
 				$object_type_description = 'users';
 			}
 			if ( 'term' === $object_type ) {
-				$object_type_description = "taxonomy ${result['object_subtype']}";
+				$object_type_description = "taxonomy {$result['object_subtype']}";
 			}
-			\WP_CLI::line( "Indexed $object_type_description, total ${result['objects_indexed']} items." );
+			\WP_CLI::line( "Indexed $object_type_description, total {$result['objects_indexed']} items." );
 
 			if ( isset( $result['error'] ) && $result['error'] instanceof \WP_Error ) {
 				\WP_CLI::warning( $result['error']->get_error_message() );

@@ -84,7 +84,7 @@ class BatchReindex {
 			}
 		}
 
-		if ( false === $this->item_store->recalculate_index( $this->sitemap, $exclude ) ) {
+		if ( ! $this->item_store->recalculate_index( $this->sitemap, $exclude ) ) {
 			return false;
 		}
 
@@ -135,12 +135,15 @@ class BatchReindex {
 		foreach ( $this->insert as $item ) {
 			$index = $this->item_store->get_index_after_item( $item, 'next_item_index' );
 			if ( null === $index ) {
-				$index = $this->sitemap->last_item_index + 1;
+				$index = null === $this->sitemap->last_item_index ? 0 : $this->sitemap->last_item_index + 1;
 			}
 			$inserts_by_index[ $index ][] = $item;
 		}
 
-		$remove_indexes = array_filter( array_map( fn( $item ) => $item->item_index, $this->remove ) );
+		$remove_indexes = array_filter(
+			array_map( fn( $item ) => $item->item_index, $this->remove ),
+			fn( $item_index ) => null !== $item_index
+		);
 
 		$inserts = array_map( 'count', $inserts_by_index );
 		$removes = array_combine(
@@ -189,8 +192,8 @@ class BatchReindex {
 				$max_index = $offset_indexes[ $i + 1 ] - 1;
 			}
 
-			$where_clause = $max_index ? 'next_item_index BETWEEN %d AND %d' : 'next_item_index >= %d';
-			$where_data   = array_filter( [ $min_index, $max_index ] );
+			$where_clause = null !== $max_index ? 'next_item_index BETWEEN %d AND %d' : 'next_item_index >= %d';
+			$where_data   = null !== $max_index ? [ $min_index, $max_index ] : [ $min_index ];
 
 			$this->item_store->offset_next_index(
 				$index_offset,
